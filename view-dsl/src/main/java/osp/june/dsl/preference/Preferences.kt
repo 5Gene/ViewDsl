@@ -118,7 +118,7 @@ fun <T> PreferenceGroup.layout(layout: Int, content: @ViewDslScope T.() -> Unit 
     })
 }
 
-fun PreferenceGroup.layout(layout: Int, content: @ViewDslScope Preference.() -> Unit = { }) {
+fun PreferenceGroup.layout2(layout: Int, content: @ViewDslScope Preference.() -> Unit = { }) {
     addPreference(Preference(context).apply {
         layoutResource = layout
         content()
@@ -252,7 +252,7 @@ fun PreferenceFragmentCompat.buildScreen(prefScreen: PrefScreen) {
                 }
                 category.widgets.forEach { widget ->
                     when (widget) {
-                        is PrefBean.PreLayout -> layout(widget.layout) {
+                        is PrefBean.PreLayout -> layout2(widget.layout) {
                             widget.onClick?.let { onClick ->
                                 setOnPreferenceClickListener {
                                     onClick(this@category)
