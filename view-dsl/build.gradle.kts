@@ -9,7 +9,7 @@ plugins {
 group = "io.github.5gene"
 version = "0.0.1"
 
-publish5hmlA("android view dsl", "kotlin")
+publish5hmlA("android view dsl", "debug")
 
 android {
     namespace = "osp.june.dsl"
