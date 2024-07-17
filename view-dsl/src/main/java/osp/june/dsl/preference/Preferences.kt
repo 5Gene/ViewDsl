@@ -15,8 +15,8 @@ import androidx.preference.PreferenceViewHolder
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import androidx.preference.SwitchPreferenceCompat
+import osp.june.dsl.R
 import osp.june.dsl.ViewDslScope
-import osp.sparkj.dsl.R
 
 //https://developer.android.google.cn/develop/ui/views/components/settings?hl=zh-cn
 

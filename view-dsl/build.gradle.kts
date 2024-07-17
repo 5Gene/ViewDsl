@@ -1,4 +1,4 @@
-import wing.publish5hmlA
+import wing.publishMavenCentral
 
 plugins {
     id("com.android.library")
@@ -9,7 +9,7 @@ plugins {
 group = "io.github.5gene"
 version = "0.0.1"
 
-publish5hmlA("android view dsl", "debug")
+publishMavenCentral("android view dsl", "debug")
 
 android {
     namespace = "osp.june.dsl"
