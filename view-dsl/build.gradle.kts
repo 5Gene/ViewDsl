@@ -7,7 +7,7 @@ plugins {
 
 
 group = "io.github.5gene"
-version = "0.0.1"
+version = wings.versions.view.dsl.get()
 
 publishMavenCentral("android view dsl", "debug")
 
