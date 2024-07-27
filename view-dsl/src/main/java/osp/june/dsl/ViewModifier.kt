@@ -10,11 +10,11 @@ inline fun <reified T> Any?.safeAs(): T? = this as? T
 
 interface ViewModifier {
 
-    fun Modifier.toKeyMap(): Map<String, MutableList<Modifier.Element>> {
-        val result = mutableMapOf<String, MutableList<Modifier.Element>>()
+    fun VModifier.toKeyMap(): Map<String, MutableList<VModifier.Element>> {
+        val result = mutableMapOf<String, MutableList<VModifier.Element>>()
         foldIn(null) { _, element ->
             val key = element::class.simpleName!!
-            result[key]?.add(element) ?: mutableListOf<Modifier.Element>().apply {
+            result[key]?.add(element) ?: mutableListOf<VModifier.Element>().apply {
                 add(element)
                 result[key] = this
             }
@@ -70,7 +70,7 @@ interface ViewModifier {
             )
         },
         private val touchHandler: ((Locker, MotionEvent, () -> Boolean) -> Boolean) = { _, _, superTouch -> superTouch() }
-    ) : Modifier.Element {
+    ) : VModifier.Element {
 
         fun draw(locker: Locker, canvas: Canvas, superDraw: (Canvas) -> Unit) {
             drawHandler.invoke(locker, canvas, superDraw)
@@ -89,13 +89,13 @@ interface ViewModifier {
         }
     }
 
-    class VCustomizeModifier(private val action: View.() -> Unit) : Modifier.Element {
+    class VCustomizeModifier(private val action: View.() -> Unit) : VModifier.Element {
         fun attach(view: View) {
             view.action()
         }
     }
 
-    class VExtraMapModifier(private val mapData: MutableDSLMap<String, Any>) : Modifier.Element {
+    class VExtraMapModifier(private val mapData: MutableDSLMap<String, Any>) : VModifier.Element {
         fun extra(): Map<String, Any> = mapData
     }
 }

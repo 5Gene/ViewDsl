@@ -16,7 +16,7 @@ import osp.sparkj.cartoon.wings.transForm
 
 interface FlipCard : ViewModifier {
 
-    fun Modifier.vFlipFather(
+    fun VModifier.vFlipFather(
         hover: Float = 36F, time: Long = 3111, stable: Boolean = false
     ) = this.then(
         ViewModifier.VDrawTouchModifier(
@@ -43,7 +43,7 @@ interface FlipCard : ViewModifier {
     /**
      * cardWidthFactor:卡片宽度比例
      */
-    fun Modifier.vFlipExpand(cardWidthFactor: Float = 0.95F, topOffset: Float? = null) = this.then(
+    fun VModifier.vFlipExpand(cardWidthFactor: Float = 0.95F, topOffset: Float? = null) = this.then(
         ViewModifier.VDrawTouchModifier(
             attachedHandler = { attachAnimator(it, true) },
             drawHandler = { locker, canvas, superDraw ->
@@ -92,7 +92,7 @@ interface FlipCard : ViewModifier {
             })
     )
 
-    fun Modifier.vFlipCard(widthScale: Float = 0.1F, topOffset: Float? = null) = this.then(
+    fun VModifier.vFlipCard(widthScale: Float = 0.1F, topOffset: Float? = null) = this.then(
         ViewModifier.VDrawTouchModifier(
             attachedHandler = { attachAnimator(it, true) },
             drawHandler = { locker, canvas, superDraw ->
@@ -142,7 +142,7 @@ interface FlipCard : ViewModifier {
             })
     )
 
-    fun Modifier.vFlipHeadView(listener: (View, Float) -> Unit = { _, _ -> }) = this.then(
+    fun VModifier.vFlipHeadView(listener: (View, Float) -> Unit = { _, _ -> }) = this.then(
         ViewModifier.VDrawTouchModifier(
             attachedHandler = {
                 with(it.view()) {
@@ -168,7 +168,7 @@ interface FlipCard : ViewModifier {
             })
     )
 
-    fun Modifier.vFlipCardView(widthScale: Float = 0.95F) = this.then(
+    fun VModifier.vFlipCardView(widthScale: Float = 0.95F) = this.then(
         ViewModifier.VDrawTouchModifier(
             attachedHandler = {
                 with(it.view()) {
@@ -198,7 +198,7 @@ interface FlipCard : ViewModifier {
 
 interface View3DModifier : FlipCard {
 
-    fun Modifier.v3DTouch2(
+    fun VModifier.v3DTouch2(
         deep: Float = 15F
     ) = this.then(
         ViewModifier.VDrawTouchModifier(
@@ -237,7 +237,7 @@ interface View3DModifier : FlipCard {
         )
     )
 
-    fun Modifier.v3DTouch(
+    fun VModifier.v3DTouch(
         deep: Float = 15F
     ) = this.then(
         ViewModifier.VDrawTouchModifier(
@@ -280,7 +280,7 @@ interface View3DModifier : FlipCard {
     /**
      * 需要父级控件不剪切
      */
-    fun Modifier.vRotateHover(
+    fun VModifier.vRotateHover(
         hover: Float = 26F, time: Long = 3111, stable: Boolean = true
     ) = this.then(
         ViewModifier.VDrawTouchModifier(
@@ -381,7 +381,7 @@ interface View3DModifier : FlipCard {
     )
 
 
-    fun Modifier.vFold(
+    fun VModifier.vFold(
         hover: Float = 36F, time: Long = 3111, stable: Boolean = false
     ) = this.then(
         ViewModifier.VDrawTouchModifier(

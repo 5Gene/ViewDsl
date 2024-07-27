@@ -57,14 +57,14 @@ fun View.transForm(
 
 interface ViewCompose : View3DModifier {
 
-    fun Modifier.vSize(
+    fun VModifier.vSize(
         width: Number = ViewGroup.LayoutParams.WRAP_CONTENT,
         height: Number = ViewGroup.LayoutParams.WRAP_CONTENT
     ) = this.then(ViewModifier.VCustomizeModifier {
         layoutParams = ViewGroup.LayoutParams(width.toInt(), height.toInt())
     })
 
-    fun Modifier.vSizeFactor(
+    fun VModifier.vSizeFactor(
         widthFactor: Number = 1F, heightFactor: Number = 1F
     ) = this.then(vExtra {
         "sizeFactor" put (widthFactor.toFloat() to heightFactor.toFloat())
@@ -73,17 +73,17 @@ interface ViewCompose : View3DModifier {
     /**
      * 宽：高
      */
-    fun Modifier.vAspectRatio(
+    fun VModifier.vAspectRatio(
         aspectRatio: Number = 1F
     ) = this.then(vExtra {
         "aspectRatio" put aspectRatio.toFloat()
     })
 
-    fun Modifier.vLayoutParam(param: ViewGroup.LayoutParams) = this.then(ViewModifier.VCustomizeModifier {
+    fun VModifier.vLayoutParam(param: ViewGroup.LayoutParams) = this.then(ViewModifier.VCustomizeModifier {
         layoutParams = param
     })
 
-    fun Modifier.debug(color: Int = Color.parseColor("green")) = this.then(ViewModifier.VCustomizeModifier {
+    fun VModifier.debug(color: Int = Color.parseColor("green")) = this.then(ViewModifier.VCustomizeModifier {
 //        setBackgroundColor(Color.RED)
 //        setBackgroundColor(Color.parseColor("red"))
         setBackgroundColor(color)
@@ -91,15 +91,15 @@ interface ViewCompose : View3DModifier {
 
     //Modifier.fillVector
 
-    fun Modifier.vCustomize(customize: View.() -> Unit) = this.then(ViewModifier.VCustomizeModifier {
+    fun VModifier.vCustomize(customize: View.() -> Unit) = this.then(ViewModifier.VCustomizeModifier {
         this.customize()
     })
 
-    fun Modifier.vExtra(mapData: MutableDSLMap<String, Any>.() -> Unit) = this.then(
+    fun VModifier.vExtra(mapData: MutableDSLMap<String, Any>.() -> Unit) = this.then(
         ViewModifier.VExtraMapModifier(MutableDSLMap<String, Any>().apply(mapData))
     )
 
-    fun Modifier.vDraw(
+    fun VModifier.vDraw(
         drawFront: ((Locker, Canvas) -> Unit)? = null, drawBehind: ((Locker, Canvas) -> Unit)? = null
     ) = this.then(ViewModifier.VDrawTouchModifier(drawHandler = { locker, canvas, superDraw ->
         drawBehind?.invoke(locker, canvas)

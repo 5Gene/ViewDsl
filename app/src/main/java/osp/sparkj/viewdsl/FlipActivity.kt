@@ -12,7 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.WindowCompat
 import osp.june.dsl.LayoutConstraint
-import osp.june.dsl.Modifier
+import osp.june.dsl.VModifier
 import osp.june.dsl.ViewCompose
 import osp.june.dsl.background
 import osp.june.dsl.constLayoutParams
@@ -45,12 +45,12 @@ class FlipView @JvmOverloads constructor(
         clipChildren = false
         clipToPadding = false
         vLayoutConstraint(
-            modifier = Modifier
+            modifier = VModifier
                 .vSize(-1, -1)
                 .vFlipFather()
         ) {
             vLayoutConstraint(
-                modifier = Modifier
+                modifier = VModifier
                     .vSize(-1, -1)
                     .vFlipExpand(cardWidthFactor = widthScale, topOffset = topOffset)
             ) {
@@ -76,7 +76,7 @@ class FlipView @JvmOverloads constructor(
     private fun LayoutConstraint.flipCardWithView() {
 
         val head = vLayoutConstraint(
-            modifier = osp.june.dsl.Modifier
+            modifier = osp.june.dsl.VModifier
                 .vSizeFactor(widthScale, 0)
                 .vFlipHeadView { v, p ->
                     v.alpha = 1 - p * 2
@@ -102,7 +102,7 @@ class FlipView @JvmOverloads constructor(
             }
         }
         vLayoutConstraint(
-            modifier = osp.june.dsl.Modifier
+            modifier = osp.june.dsl.VModifier
                 .debug(Color.YELLOW)
                 .vSizeFactor(widthScale, .66)
                 .vFlipCardView(widthScale)
@@ -122,7 +122,7 @@ class FlipView @JvmOverloads constructor(
 
     private fun LayoutConstraint.flipCardWithDraw() {
         vLayoutConstraint(
-            modifier = osp.june.dsl.Modifier
+            modifier = osp.june.dsl.VModifier
                 .vSize(-1, -1)
                 .vFlipCard(topOffset = topOffset)
         ) {
@@ -151,7 +151,7 @@ class Touch3D @JvmOverloads constructor(
         setBackgroundColor(Color.RED)
 
         vLayoutConstraint(
-            modifier = Modifier
+            modifier = VModifier
                 .debug()
 //                .v3DTouch2()
                 .vRotateHover()

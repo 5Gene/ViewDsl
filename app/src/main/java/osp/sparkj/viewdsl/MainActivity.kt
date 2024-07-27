@@ -21,7 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
-import osp.june.dsl.Modifier
+import osp.june.dsl.VModifier
 import osp.june.dsl.ViewCompose
 import osp.june.dsl.background
 import osp.june.dsl.constLayoutParams
@@ -58,7 +58,8 @@ class Card @JvmOverloads constructor(
         }
         padding(horizontal = 200)
         clipToPadding = false
-        vLayoutConstraint(modifier = Modifier
+        vLayoutConstraint(
+            modifier = VModifier
             .vSize(500, 500)
             .vCustomize {
                 setBackgroundColor(android.graphics.Color.GRAY)

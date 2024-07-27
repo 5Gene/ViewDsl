@@ -2,13 +2,13 @@ package osp.june.dsl
 
 
 /**
- * An ordered, immutable collection of [modifier elements][Modifier.Element] that decorate or add
+ * An ordered, immutable collection of [modifier elements][VModifier.Element] that decorate or add
  * behavior to Compose UI elements. For example, backgrounds, padding and click event listeners
  * decorate or add behavior to rows, text or buttons.
  *
  * @sample androidx.compose.ui.samples.ModifierUsageSample
  *
- * Modifier implementations should offer a fluent factory extension function on [Modifier] for
+ * Modifier implementations should offer a fluent factory extension function on [VModifier] for
  * creating combined modifiers by starting from existing modifiers:
  *
  * @sample androidx.compose.ui.samples.ModifierFactorySample
@@ -16,13 +16,13 @@ package osp.june.dsl
  * Modifier elements may be combined using [then]. Order is significant; modifier elements that
  * appear first will be applied first.
  *
- * Composables that accept a [Modifier] as a parameter to be applied to the whole component
+ * Composables that accept a [VModifier] as a parameter to be applied to the whole component
  * represented by the composable function should name the parameter `modifier` and
- * assign the parameter a default value of [Modifier]. It should appear as the first
+ * assign the parameter a default value of [VModifier]. It should appear as the first
  * optional parameter in the parameter list; after all required parameters (except for trailing
  * lambda parameters) but before any other parameters with default values. Any default modifiers
  * desired by a composable function should come after the `modifier` parameter's value in the
- * composable function's implementation, keeping [Modifier] as the default parameter value.
+ * composable function's implementation, keeping [VModifier] as the default parameter value.
  * For example:
  *
  * @sample androidx.compose.ui.samples.ModifierParameterSample
@@ -37,7 +37,7 @@ package osp.june.dsl
  *
  * @sample androidx.compose.ui.samples.SubcomponentModifierSample
  */
-interface Modifier {
+interface VModifier {
 
     /**
      * Accumulates a value starting with [initial] and applying [operation] to the current value
@@ -62,28 +62,28 @@ interface Modifier {
     fun <R> foldOut(initial: R, operation: (Element, R) -> R): R
 
     /**
-     * Returns `true` if [predicate] returns true for any [Element] in this [Modifier].
+     * Returns `true` if [predicate] returns true for any [Element] in this [VModifier].
      */
     fun any(predicate: (Element) -> Boolean): Boolean
 
     /**
-     * Returns `true` if [predicate] returns true for all [Element]s in this [Modifier] or if
-     * this [Modifier] contains no [Element]s.
+     * Returns `true` if [predicate] returns true for all [Element]s in this [VModifier] or if
+     * this [VModifier] contains no [Element]s.
      */
     fun all(predicate: (Element) -> Boolean): Boolean
 
     /**
      * Concatenates this modifier with another.
      *
-     * Returns a [Modifier] representing this modifier followed by [other] in sequence.
+     * Returns a [VModifier] representing this modifier followed by [other] in sequence.
      */
-    infix fun then(other: Modifier): Modifier =
-        if (other === Modifier) this else CombinedModifier(this, other)
+    infix fun then(other: VModifier): VModifier =
+        if (other === VModifier) this else CombinedVModifier(this, other)
 
     /**
-     * A single element contained within a [Modifier] chain.
+     * A single element contained within a [VModifier] chain.
      */
-    interface Element : Modifier {
+    interface Element : VModifier {
         override fun <R> foldIn(initial: R, operation: (R, Element) -> R): R =
             operation(initial, this)
 
@@ -96,45 +96,45 @@ interface Modifier {
     }
 
     /**
-     * The companion object `Modifier` is the empty, default, or starter [Modifier]
-     * that contains no [elements][Element]. Use it to create a new [Modifier] using
+     * The companion object `Modifier` is the empty, default, or starter [VModifier]
+     * that contains no [elements][Element]. Use it to create a new [VModifier] using
      * modifier extension factory functions:
      *
      */
     // The companion object implements `Modifier` so that it may be used as the start of a
     // modifier extension factory expression.
-    companion object : Modifier {
+    companion object : VModifier {
         override fun <R> foldIn(initial: R, operation: (R, Element) -> R): R = initial
         override fun <R> foldOut(initial: R, operation: (Element, R) -> R): R = initial
         override fun any(predicate: (Element) -> Boolean): Boolean = false
         override fun all(predicate: (Element) -> Boolean): Boolean = true
-        override infix fun then(other: Modifier): Modifier = other
+        override infix fun then(other: VModifier): VModifier = other
         override fun toString() = "Modifier"
     }
 }
 
 /**
- * A node in a [Modifier] chain. A CombinedModifier always contains at least two elements;
+ * A node in a [VModifier] chain. A CombinedModifier always contains at least two elements;
  * a Modifier [outer] that wraps around the Modifier [inner].
  */
-class CombinedModifier(
-    private val outer: Modifier,
-    private val inner: Modifier
-) : Modifier {
-    override fun <R> foldIn(initial: R, operation: (R, Modifier.Element) -> R): R =
+class CombinedVModifier(
+    private val outer: VModifier,
+    private val inner: VModifier
+) : VModifier {
+    override fun <R> foldIn(initial: R, operation: (R, VModifier.Element) -> R): R =
         inner.foldIn(outer.foldIn(initial, operation), operation)
 
-    override fun <R> foldOut(initial: R, operation: (Modifier.Element, R) -> R): R =
+    override fun <R> foldOut(initial: R, operation: (VModifier.Element, R) -> R): R =
         outer.foldOut(inner.foldOut(initial, operation), operation)
 
-    override fun any(predicate: (Modifier.Element) -> Boolean): Boolean =
+    override fun any(predicate: (VModifier.Element) -> Boolean): Boolean =
         outer.any(predicate) || inner.any(predicate)
 
-    override fun all(predicate: (Modifier.Element) -> Boolean): Boolean =
+    override fun all(predicate: (VModifier.Element) -> Boolean): Boolean =
         outer.all(predicate) && inner.all(predicate)
 
     override fun equals(other: Any?): Boolean =
-        other is CombinedModifier && outer == other.outer && inner == other.inner
+        other is CombinedVModifier && outer == other.outer && inner == other.inner
 
     override fun hashCode(): Int = outer.hashCode() + 31 * inner.hashCode()
 

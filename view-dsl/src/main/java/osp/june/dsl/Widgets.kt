@@ -347,7 +347,7 @@ inline fun <reified T : ViewGroup> T.canvas(
 inline fun <reified T : ViewGroup> T.vLayoutConstraint(
     width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.MATCH_PARENT,
-    modifier: Modifier = Modifier,
+    modifier: VModifier = VModifier,
     id: Int = NO_ID,
     viewScope: @ViewDslScope LayoutConstraint.() -> Unit
 ): ConstraintLayout {
@@ -413,7 +413,7 @@ class CanvasView @JvmOverloads constructor(
 //<editor-fold desc="CustomView">
 @SuppressLint("ViewConstructor")
 class LayoutConstraint constructor(
-    context: Context, modifier: Modifier
+    context: Context, modifier: VModifier
 ) : ConstraintLayout(context), ViewCompose, Locker by MapLocker() {
 
     private val map = modifier.toKeyMap()
