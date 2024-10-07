@@ -1,10 +1,7 @@
 name: Android CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+#https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow
+on: [ push, pull_request ]
 
 jobs:
   build:
