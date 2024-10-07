@@ -2,7 +2,6 @@ package osp.june.dsl.preference
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.preference.CheckBoxPreference
@@ -222,66 +221,22 @@ fun PreferenceGroup.checkBox(
     addPreference(key, title, summary, iconRes, CheckBoxPreference(context, null), content)
 }
 
-sealed class PrefBean() {
-    class PreSwitch(
-        val title: Any, val key: String, val content: (SwitchPreference.() -> Unit)? = null,
-        val onCheckChange: ((SwitchPreference, Boolean) -> Unit)? = null
-    ) : PrefBean()
-
-    class PreText(
-        val title: Any, val content: (Preference.() -> Unit)? = null,
-        val onClick: ((View) -> Unit)? = null
-    ) : PrefBean()
-
-    class PreLayout(
-        val layout: Int,
-        val onClick: ((PreferenceCategory) -> Unit)? = null
-    ) : PrefBean()
-}
-
-interface PreferenceWidget {
+interface PrefWidget {
     fun PreferenceGroup.content()
 }
 
-interface PreferenceCategory {
-    fun PreferenceScreen.content()
-}
+class PrefCategory(val title: String? = null, val widgets: List<PrefWidget>)
 
-class PrefCategory(val title: String? = null, val widgets: List<PrefBean>)
-
-class PrefScreen(val categories: List<PrefCategory>)
-
-fun PreferenceFragmentCompat.buildScreen(prefScreen: PrefScreen) {
+fun PreferenceFragmentCompat.buildScreen(categories: List<PrefCategory>) {
     screen {
-        prefScreen.categories.forEach { category ->
+        categories.forEach { category ->
             category {
                 category.title?.let {
                     title = it
                 }
                 category.widgets.forEach { widget ->
-                    when (widget) {
-                        is PrefBean.PreLayout -> layout2(widget.layout) {
-                            widget.onClick?.let { onClick ->
-                                setOnPreferenceClickListener {
-                                    onClick(this@category)
-                                    true
-                                }
-                            }
-                        }
-
-                        is PrefBean.PreSwitch -> switch(widget.key) {
-                            if (widget.title is Int) setTitle(widget.title) else title = widget.title.toString()
-                            widget.content?.invoke(this)
-                            widget.onCheckChange?.let {
-                                setOnPreferenceChangeListener { _, newValue ->
-                                    it.invoke(this, newValue.toString().toBoolean())
-                                    true
-                                }
-                            }
-
-                        }
-
-                        is PrefBean.PreText -> TODO()
+                    widget.apply {
+                        this@category.content()
                     }
                 }
             }
