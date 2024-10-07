@@ -33,7 +33,7 @@ jobs:
           distribution: 'temurin'
 
       # Runs a single command using the runners shell
-      - name: 🔥 publishing plugin
+      - name: 🔥 Publishing Plugin
         run: |
           echo 🐛 如果遇到Error: Could not find or load main class org.gradle.wrapper.GradleWrapperMain
           echo 💊 那么说明是因为gradle目录,gradlew文件没同步到github导致的,检查下是否此目录下有文件没上传
@@ -47,26 +47,4 @@ jobs:
           GITHUB_USER: ${{ secrets.NAME_GITHUB }}
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
 
-#      - name: 💪 build apk
-#        run: ./gradlew assembleDebug
-#      - run: echo "💡  build succeed."
-#
-#      # https://github.com/ncipollo/release-action/blob/main/README.zh-Hans.md
-#      - name: 🖥️ Release apk
-#        uses: ncipollo/release-action@v1.5.0
-#        if: startsWith(github.ref, 'refs/tags/')
-#        with:
-#          artifacts: "app/build/outputs/apk/debug/*.apk"
-#          allowUpdates: true
-#          token: ${{ secrets.dev_secret }}
-#      - run: echo "✨ ⭐ 🌟  The job finish release succeed. > ${{startsWith(github.ref, 'refs/tags/')}} 🚀"
-
-#      - name: Create key=value to local.properties
-#        run: |
-#          echo "apiKey=${{ secrets.API_KEY }}" > local.properties
-#
-#      - name: Read local.properties
-#        id: read_local_properties
-#        run: |
-#          apiKey=$(grep 'apiKey' local.properties | cut -d'=' -f2)
-#          echo "API_KEY=$apiKey" >> $GITHUB_ENV
+      - run: echo "Published successfully. 🎉🎉🎉 \n 🔗 https://central.sonatype.com/publishing"
