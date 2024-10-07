@@ -1,46 +1,17 @@
 plugins {
     id 'com.android.application'
-    alias(wings.plugins.android)
-    alias(libs.plugins.kotlin.android)
+    alias(vcl.plugins.gene.android)
 }
 
 android {
     namespace 'osp.sparkj.viewdsl'
-    compileSdk libs.versions.android.compileSdk.get().toInteger()
-
-    defaultConfig {
-        applicationId "osp.sparkj.viewdsl"
-        minSdk libs.versions.android.minSdk.get().toInteger()
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        freeCompilerArgs = ["-Xcontext-receivers"]
-        jvmTarget = '11'
-    }
 }
 
 dependencies {
     implementation project(':view-dsl')
-    implementation wings.sparkj.cartoon
-    implementation libs.androidx.fragment.ktx
-    implementation libs.androidx.appcompat
-    implementation libs.google.material
-    implementation libs.androidx.activity
-    implementation libs.androidx.preference.ktx
+    implementation wings.gene.cartoon
+    implementation vcl.androidx.preference.ktx
+    implementation vcl.androidx.constraintlayout
 //    implementation libs.androidx.compose.ui
 //    implementation libs.androidx.core.ktx
 //    implementation libs.androidx.appcompat

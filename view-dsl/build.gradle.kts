@@ -2,27 +2,23 @@ import wing.publishMavenCentral
 
 plugins {
     id("com.android.library")
-    alias(wings.plugins.android)
+    alias(vcl.plugins.gene.android)
 }
 
 
 group = "io.github.5gene"
-version = wings.versions.view.dsl.get()
+version = wings.versions.viewDsl.get()
 
-publishMavenCentral("android view dsl", "debug")
+publishMavenCentral("android view dsl")
 
 android {
     namespace = "osp.june.dsl"
 }
 
 dependencies {
-    implementation(wings.sparkj.cartoon)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.preference.ktx)
-    implementation(libs.androidx.fragment.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.google.material)
-    testImplementation(libs.test.junit)
+    implementation(wings.gene.cartoon)
+    implementation(vcl.google.material)
+    implementation(vcl.androidx.constraintlayout)
+    implementation(vcl.androidx.preference.ktx)
+//    implementation(libs.google.material)
 }

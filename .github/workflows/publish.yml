@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: publishToMavenCentral
+name: publish plugin
 
 # Controls when the workflow will run
 on:
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: 🐼 Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -36,7 +36,7 @@ jobs:
       - name: 🔥 publishing plugin
         run: |
           echo 🐛 如果遇到Error: Could not find or load main class org.gradle.wrapper.GradleWrapperMain
-          echo 💊 那么说明是因为gradle目录没同步到github导致的,检查下是否此目录下有文件没上传
+          echo 💊 那么说明是因为gradle目录,gradlew文件没同步到github导致的,检查下是否此目录下有文件没上传
           chmod +x gradlew
           ./gradlew publishToMavenCentral
         env:
@@ -47,19 +47,19 @@ jobs:
           GITHUB_USER: ${{ secrets.NAME_GITHUB }}
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
 
-      - name: 💪 build apk
-        run: ./gradlew assembleDebug
-      - run: echo "💡  build succeed."
-
-      # https://github.com/ncipollo/release-action/blob/main/README.zh-Hans.md
-      - name: 🖥️ Release apk
-        uses: ncipollo/release-action@v1.5.0
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          artifacts: "app/build/outputs/apk/debug/*.apk"
-          allowUpdates: true
-          token: ${{ secrets.dev_secret }}
-      - run: echo "✨ ⭐ 🌟  The job finish release succeed. > ${{startsWith(github.ref, 'refs/tags/')}} 🚀"
+#      - name: 💪 build apk
+#        run: ./gradlew assembleDebug
+#      - run: echo "💡  build succeed."
+#
+#      # https://github.com/ncipollo/release-action/blob/main/README.zh-Hans.md
+#      - name: 🖥️ Release apk
+#        uses: ncipollo/release-action@v1.5.0
+#        if: startsWith(github.ref, 'refs/tags/')
+#        with:
+#          artifacts: "app/build/outputs/apk/debug/*.apk"
+#          allowUpdates: true
+#          token: ${{ secrets.dev_secret }}
+#      - run: echo "✨ ⭐ 🌟  The job finish release succeed. > ${{startsWith(github.ref, 'refs/tags/')}} 🚀"
 
 #      - name: Create key=value to local.properties
 #        run: |

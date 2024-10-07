@@ -2,39 +2,25 @@ name: Android CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
+
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      - name: 🐼 Set up JDK 18
-        uses: actions/setup-java@v3
+      - uses: actions/checkout@v2
+      - name: set up JDK 11
+        uses: actions/setup-java@v2
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: '11'
+          distribution: 'adopt'
+          cache: gradle
 
-      - name: 🔔 Grant execute permission for gradlew
-        run: |
-          echo 🐛 如果遇到Error: Could not find or load main class org.gradle.wrapper.GradleWrapperMain
-          echo 💊 那么说明是因为gradle目录没同步到github导致的,检查下是否此目录下有文件没上传
-          chmod +x ./gradlew
-      - name: 💪 build apk
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
         run: ./gradlew assembleDebug
-
-      - run: echo "💡  build succeed."
-
-      - name: 📸 Upload APK
-        uses: actions/upload-artifact@v2
-        with:
-          name: demo-apk
-          path: app/build/outputs/apk/debug/app-debug.apk

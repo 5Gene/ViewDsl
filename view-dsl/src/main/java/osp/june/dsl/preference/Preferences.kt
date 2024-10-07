@@ -61,7 +61,7 @@ fun <T : Preference> PreferenceGroup.addPreference(
     summary: Any? = null,
     iconRes: Int? = null,
     preference: T,
-    content: (T.() -> Unit)? = null
+    content: @ViewDslScope() (T.() -> Unit)? = null
 ) {
     addPreference(preference.apply {
         setKey(key)
@@ -140,7 +140,7 @@ private class UrlPreference(context: Context) : Preference(context) {
     }
 }
 
-fun PreferenceGroup.linearLayout(content: LinearLayout.() -> Unit) {
+fun PreferenceGroup.linearLayout(content: @ViewDslScope() LinearLayout.() -> Unit) {
     addPreference(LayoutPreference<LinearLayout>(context).apply {
         layoutResource = R.layout.preference_layout_dsl
         this.content = content
@@ -237,6 +237,14 @@ sealed class PrefBean() {
         val layout: Int,
         val onClick: ((PreferenceCategory) -> Unit)? = null
     ) : PrefBean()
+}
+
+interface PreferenceWidget {
+    fun PreferenceGroup.content()
+}
+
+interface PreferenceCategory {
+    fun PreferenceScreen.content()
 }
 
 class PrefCategory(val title: String? = null, val widgets: List<PrefBean>)
