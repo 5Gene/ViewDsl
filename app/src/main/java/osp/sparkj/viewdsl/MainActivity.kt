@@ -27,9 +27,9 @@ import osp.june.dsl.background
 import osp.june.dsl.constLayoutParams
 import osp.june.dsl.icon
 import osp.june.dsl.padding
+import osp.june.dsl.plus
 import osp.june.dsl.safeAs
 import osp.june.dsl.spacer
-import osp.june.dsl.unaryPlus
 import osp.june.dsl.vLayoutConstraint
 import osp.sparkj.cartoon.wings.todp
 import osp.sparkj.cartoon.wings.todpf
@@ -39,9 +39,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            +Card(context)
+            this + Card(context)
             spacer(height = 16.todp)
-            +QACard(context)
+            this + QACard(context)
         })
     }
 }
@@ -60,11 +60,11 @@ class Card @JvmOverloads constructor(
         clipToPadding = false
         vLayoutConstraint(
             modifier = VModifier
-            .vSize(500, 500)
-            .vCustomize {
-                setBackgroundColor(android.graphics.Color.GRAY)
-            }
-            .vRotateHover()
+                .vSize(500, 500)
+                .vCustomize {
+                    setBackgroundColor(android.graphics.Color.GRAY)
+                }
+                .vRotateHover()
         ) {
             icon {
                 setImageResource(R.mipmap.img)

@@ -17,8 +17,8 @@ android {
 }
 
 dependencies {
-    implementation(vcl.gene.cartoon)
-    implementation(vcl.google.material)
-    implementation(vcl.androidx.constraintlayout)
-    implementation(vcl.androidx.preference.ktx)
+    api(vcl.gene.cartoon)
+    api(vcl.google.material)
+    api(vcl.androidx.constraintlayout)
+    api(vcl.androidx.preference.ktx)
 }

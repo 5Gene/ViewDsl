@@ -1,24 +1,12 @@
 package osp.june.wings
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.TypedValue
-import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
-
-context(Context)
-fun Int.getString() = getText(this)
-
-context(Context)
-fun Int.getColor() = getColor(this)
-
-context(Context)
-@SuppressLint("UseCompatLoadingForDrawables")
-fun Int.getDrawable() = getDrawable(this)
 
 fun Int.vector2Bitmap(context: Context, block: ((Canvas) -> Unit)? = null): Bitmap {
     val drawable = AppCompatResources.getDrawable(context, this)!!
@@ -42,22 +30,18 @@ val Number.todp: Int
 
 fun Number.ceilToInt() = kotlin.math.ceil(this.toDouble()).toInt()
 
-context(View)
-val Number.todp: Int
-    get() = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
-    ).toInt()
+fun Number.todp(context: Context): Int = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
+).toInt()
 
 val Number.todpf: Float
     get() = TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), Resources.getSystem().displayMetrics
     )
 
-context(View)
-val Number.todpf: Float
-    get() = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
-    )
+fun Number.todpf(context: Context): Float = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
+)
 
 val Number.tosp: Float
     get() = TypedValue.applyDimension(

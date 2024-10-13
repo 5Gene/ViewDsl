@@ -14,19 +14,19 @@ import java.security.MessageDigest
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-fun json(build: JSONObject.() -> Unit) = JSONObject().apply { build() }
+class JSONObjectBuilder : JSONObject() {
 
-context(JSONObject)
-infix fun String.kv(build: JSONObject.() -> Unit) = put(this, JSONObject().build())
+    infix fun String.kv(build: JSONObjectBuilder.() -> Unit) = put(this, JSONObjectBuilder().build())
 
-/**
- *  json {
- *     "key" kv "value"
- *  }
- */
-context(JSONObject)
-infix fun String.kv(value: Any) = put(this, value)
+    /**
+     *  buildJson {
+     *     "key" kv "value"
+     *  }
+     */
+    infix fun String.kv(value: Any) = put(this, value)
+}
 
+fun buildJson(build: JSONObjectBuilder.() -> Unit) = JSONObjectBuilder().apply { build() }
 
 val String.Companion.Empty
     inline get() = ""
@@ -67,12 +67,10 @@ fun String.toResId(defType: String = "drawable", context: Context): Int {
     return context.resources.getIdentifier(this, defType, context.packageName)
 }
 
-context(Activity)
-fun String.toStr() {
-    findString(this)
+fun String.toString(activity: Activity) {
+    activity.findString(this)
 }
 
-context(Activity)
-fun String.toDrawable() {
-    findDrawable(this)
+fun String.toDrawable(activity: Activity) {
+    activity.findDrawable(this)
 }

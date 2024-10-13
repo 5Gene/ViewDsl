@@ -53,14 +53,12 @@ fun ViewGroup.addViewCheck(child: View, width: Int, height: Int) {
     }
 }
 
-context(ViewGroup)
 operator fun View.unaryMinus() {
-    this@ViewGroup.removeView(this)
+    (this.parent as ViewGroup).removeView(this)
 }
 
-context(ViewGroup)
-operator fun View.unaryPlus(): LayoutParams {
-    if (this in this@ViewGroup) {
+operator fun ViewGroup.plus(child: View): LayoutParams {
+    if (child in this) {
         return layoutParams
     }
     if (this@ViewGroup.findViewById<View>(id) != null) {
@@ -370,7 +368,7 @@ class CanvasView @JvmOverloads constructor(
     private var onTouchEvent: ((MotionEvent, () -> Boolean) -> Boolean)? = null
 
     init {
-        keepView()
+        keepView(this)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -432,7 +430,7 @@ class LayoutConstraint constructor(
         map[ViewModifier.VCustomizeModifier::class.simpleName]?.forEach {
             it.safeAs<ViewModifier.VCustomizeModifier>()?.attach(this)
         }
-        keepView()
+        keepView(this)
     }
 
     private val size = RectF(0F, 0f, 0f, 0F)
@@ -597,10 +595,8 @@ interface Locker {
 
 fun Locker.view(): View = retrieve("view")!!
 
-context(View)
-fun Locker.keepView() = retrieve("view") { this }
+fun Locker.keepView(view: View) = retrieve("view") { view }
 
-context(View)
 fun Locker.animatorsCancel() =
     retrieve<MutableMap<String, ValueAnimator>>("animator")?.values?.forEach {
         it.removeAllUpdateListeners()

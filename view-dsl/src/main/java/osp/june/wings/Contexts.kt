@@ -66,16 +66,14 @@ fun Context.getValueFromAttr() {
 //  }
 
 
-context(Context)
-fun Int.toDrawable() = findDrawable(this)
+fun Int.toDrawable(context: Context) = context.findDrawable(this)
 
 fun Context.findDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
 
 fun Context.findDrawable(draName: String) = ContextCompat.getDrawable(this, draName.toResId(context = this))
 
 
-context(Context)
-fun Int.toColor() = findColor(this)
+fun Int.toColor(context: Context) = context.findColor(this)
 
 fun Context.findColor(@ColorRes id: Int) = ContextCompat.getColor(this, id)
 fun Context.findColor(colorName: String) = ContextCompat.getColor(
@@ -87,8 +85,7 @@ fun Context.findColor(colorName: String) = ContextCompat.getColor(
 fun Context.findString(@StringRes str: Int) = getString(str)
 
 
-context(Context)
-fun Int.toStr() = findString(this)
+fun Int.toString(context: Context) = context.findString(this)
 
 fun Context.findString(strName: String) = findString(findStringRes(strName))
 

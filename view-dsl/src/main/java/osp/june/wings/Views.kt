@@ -278,8 +278,3 @@ inline fun <reified B> View.tag(block: _Tag.() -> B) = _Tag(this).run(block)
 
 
 inline fun <reified B> Int.toTag(view: View) = view.getTag(this).safeAs<B>()
-
-
-context(View)
-inline fun <reified B> Int.toTag() = getTag(this).safeAs<B>()
-

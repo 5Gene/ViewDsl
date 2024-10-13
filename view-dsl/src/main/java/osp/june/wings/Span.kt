@@ -1,5 +1,6 @@
 package osp.june.wings
 
+import android.content.Context
 import android.graphics.BlurMaskFilter
 import android.graphics.EmbossMaskFilter
 import android.graphics.Typeface
@@ -20,7 +21,6 @@ import android.text.style.SuperscriptSpan
 import android.text.style.TextAppearanceSpan
 import android.text.style.TypefaceSpan
 import android.text.style.UnderlineSpan
-import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import osp.sparkj.cartoon.wings.todp
@@ -125,13 +125,11 @@ fun SpannableStringBuilder.bold(text: String, other: Any? = null) {
     addSpan(text, StyleSpan(Typeface.BOLD), other)
 }
 
-context(TextView)
-fun SpannableStringBuilder.image(regex: String, @DrawableRes res: Int, other: Any? = null) {
+fun SpannableStringBuilder.image(context: Context, regex: String, @DrawableRes res: Int, other: Any? = null) {
     span(regex, ImageSpan(context, res), other)
 }
 
-context(TextView)
-fun SpannableStringBuilder.textAppearance(appearance: Int, text: String, other: Any? = null) {
+fun SpannableStringBuilder.textAppearance(context: Context, appearance: Int, text: String, other: Any? = null) {
     addSpan(text, TextAppearanceSpan(context, appearance), other)
 }
 
