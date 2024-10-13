@@ -1,3 +1,4 @@
+import wing.GroupIdMavenCentral
 import wing.publishMavenCentral
 
 plugins {
@@ -6,8 +7,8 @@ plugins {
 }
 
 
-group = "io.github.5gene"
-version = wings.versions.viewDsl.get()
+group = GroupIdMavenCentral
+version = libs.versions.gene.view.dsl.get()
 
 publishMavenCentral("android view dsl")
 
@@ -16,9 +17,8 @@ android {
 }
 
 dependencies {
-    implementation(wings.gene.cartoon)
+    implementation(vcl.gene.cartoon)
     implementation(vcl.google.material)
     implementation(vcl.androidx.constraintlayout)
     implementation(vcl.androidx.preference.ktx)
-//    implementation(libs.google.material)
 }

@@ -1,0 +1,19 @@
+#https://github.com/terrakok/kmp-awesome
+
+[versions]
+gene-view-dsl = "1.0"
+
+[libraries]
+
+[bundles]
+
+[plugins]
+
+#需要手动配置 才可以使用
+#dependencyResolutionManagement {
+#    versionCatalogs {
+#        create("wings") {
+#            from(files("gradle/wings.versions.toml"))
+#        }
+#    }
+#}

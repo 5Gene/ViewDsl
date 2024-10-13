@@ -7,15 +7,10 @@ pluginManagement {
 }
 
 plugins {
-    id("io.github.5hmlA.vcl") version "24.10.01"
+    id("io.github.5hmlA.vcl") version "24.10.12-3"
 }
 
 dependencyResolutionManagement {
-    versionCatalogs {
-        create("wings") {
-            from(files("gradle/wings.versions.toml"))
-        }
-    }
     repositories {
         google()
         mavenCentral()
