@@ -10,7 +10,6 @@ import android.content.res.Resources
 import android.graphics.Rect
 import android.os.PowerManager
 import android.util.DisplayMetrics
-import android.util.TypedValue
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
@@ -22,49 +21,6 @@ fun Context.isInPreview() {
     //com.android.layoutlib.bridge.android.BridgeContext
     this.javaClass.simpleName.contains("BridgeContext")
 }
-
-// 定义自定义属性并在主题配置
-// 1 attrs.xml 定义属性 <color name="theme_color_blue">#ff0071d3</color>
-// 2 主题style.xml 中设置属性
-//  <style name="BlueTheme" parent="@android:style/Theme.Black.NoTitleBar">
-//    <item name="theme_color">#000fff</item>
-//  </style>
-//https://stackoverflow.com/questions/17277618/get-color-value-programmatically-when-its-a-reference-theme
-fun Context.attrValueFromTheme(res: Int) {
-    TypedValue().apply {
-//        MaterialColors.getColor()
-        theme.resolveAttribute(res, this, true)
-    }.data
-}
-
-fun Context.getValueFromAttr() {
-    val attrs = intArrayOf(android.R.attr.textSize)
-//    解析 style
-//    context.obtainStyledAttributes(布局中的attrs, 主题格式R.styleable.xxx, theme中配置的style, 默认样式 R.style.xxxx)
-    val typedArray = this.obtainStyledAttributes(attrs)
-    val dimension = typedArray.getDimension(0, 0F)
-    typedArray.recycle()
-}
-
-
-//  public MultiStateLayout(Context context) {
-//    super(context, null);
-//  }
-//
-//  public MultiStateLayout(Context context, AttributeSet attrs) {
-//    this(context, attrs, R.attr.jmultistate); //jmultistate主题里的属性
-//  }
-//
-//  public MultiStateLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-//    super(context, attrs, defStyleAttr);
-//    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MultiStateLayout, defStyleAttr, R.style.Jmultistate_style);
-//    layout_error_resid = a.getResourceId(R.styleable.MultiStateLayout_error, View.NO_ID);
-//    layout_loading_resid = a.getResourceId(R.styleable.MultiStateLayout_loading, View.NO_ID);
-//    layout_empty_resid = a.getResourceId(R.styleable.MultiStateLayout_empty, View.NO_ID);
-//    mLayoutState = a.getInt(R.styleable.MultiStateLayout_state, LayoutState.STATE_UNMODIFY);
-//    a.recycle();
-//  }
-
 
 fun Int.toDrawable(context: Context) = context.findDrawable(this)
 

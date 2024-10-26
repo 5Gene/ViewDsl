@@ -110,10 +110,11 @@ fun PreferenceScreen.category(title: Any? = null, content: @ViewDslScope Prefere
 /**
  * PreferenceCategory和PreferenceScreen都可引用
  */
-fun <T> PreferenceGroup.layout(layout: Int, content: @ViewDslScope T.() -> Unit = { }) {
+fun <T> PreferenceGroup.layout(layout: Int, once: Boolean = true, content: @ViewDslScope T.() -> Unit = { }) {
     addPreference(LayoutPreference<T>(context).apply {
         layoutResource = layout
         this.content = content
+        this.once = once
     })
 }
 
@@ -125,9 +126,13 @@ fun PreferenceGroup.layout2(layout: Int, content: @ViewDslScope Preference.() ->
 }
 
 private class LayoutPreference<T>(context: Context) : Preference(context) {
-    var content: T.() -> Unit = {}
+    var content: (T.() -> Unit)? = {}
+    var once = true
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
-        (holder.itemView as T).content()
+        content?.invoke((holder.itemView as T))
+        if (once) {
+            content = null
+        }
     }
 }
 

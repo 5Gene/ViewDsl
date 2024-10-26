@@ -1,13 +1,19 @@
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
 plugins {
-    id("io.github.5hmlA.vcl") version "24.10.12-3"
+    id("io.github.5hmlA.vcl") version "24.10.27"
 }
 
 dependencyResolutionManagement {

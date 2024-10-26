@@ -1,5 +1,5 @@
-import wing.GroupIdMavenCentral
-import wing.publishMavenCentral
+import june.wing.GroupIdMavenCentral
+import june.wing.publishMavenCentral
 
 plugins {
     id("com.android.library")

@@ -27,9 +27,6 @@ val Number.todp: Int
         TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), Resources.getSystem().displayMetrics
     ).toInt()
 
-
-fun Number.ceilToInt() = kotlin.math.ceil(this.toDouble()).toInt()
-
 fun Number.todp(context: Context): Int = TypedValue.applyDimension(
     TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
 ).toInt()
@@ -47,3 +44,5 @@ val Number.tosp: Float
     get() = TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), Resources.getSystem().displayMetrics
     )
+
+fun Number.ceilToInt() = kotlin.math.ceil(this.toDouble()).toInt()
