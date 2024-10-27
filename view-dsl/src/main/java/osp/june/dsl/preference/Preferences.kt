@@ -128,19 +128,12 @@ fun PreferenceGroup.layout2(layout: Int, content: @ViewDslScope Preference.() ->
 private class LayoutPreference<T>(context: Context) : Preference(context) {
     var content: (T.() -> Unit)? = {}
     var once = true
+
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         content?.invoke((holder.itemView as T))
         if (once) {
             content = null
         }
-    }
-}
-
-private class UrlPreference(context: Context) : Preference(context) {
-    override fun onBindViewHolder(holder: PreferenceViewHolder) {
-        super.onBindViewHolder(holder)
-        val imageView = holder.findViewById(android.R.id.icon) as ImageView
-        //显示地址图片
     }
 }
 
@@ -249,4 +242,12 @@ fun PreferenceFragmentCompat.buildScreen(categories: List<PrefCategory>) {
     }
 }
 
+
+private class UrlPreference(context: Context) : Preference(context) {
+    override fun onBindViewHolder(holder: PreferenceViewHolder) {
+        super.onBindViewHolder(holder)
+        val imageView = holder.findViewById(android.R.id.icon) as ImageView
+        //显示地址图片
+    }
+}
 
