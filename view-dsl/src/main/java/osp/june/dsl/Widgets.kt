@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package osp.june.dsl
 
 import android.animation.LayoutTransition
@@ -57,20 +59,25 @@ operator fun View.unaryMinus() {
     (this.parent as ViewGroup).removeView(this)
 }
 
-operator fun ViewGroup.plus(child: View): LayoutParams {
+operator fun ViewGroup.plus(child: View): ViewGroup {
     if (child in this) {
-        return layoutParams
+        return this
     }
-    if (this@ViewGroup.findViewById<View>(id) != null) {
-        return layoutParams
+    if (findViewById<View>(child.id) != null) {
+        return this
     }
-    this@ViewGroup.addView(checkId())
+    addView(checkId())
     //在addViewInner中
 //    if (!checkLayoutParams(params)) {
 //      这段代码会把ViewGroup.LayoutParams转化成对应布局的param比如LinearLayout的转为LinearLayout.LayoutParams
 //        params = generateLayoutParams(params);
 //    }
-    return layoutParams
+    return this
+}
+
+operator fun ViewGroup.minus(child: View): ViewGroup {
+    removeView(child)
+    return this
 }
 
 fun ViewGroup.animateLayoutChange(transition: LayoutTransition = LayoutTransition()) {

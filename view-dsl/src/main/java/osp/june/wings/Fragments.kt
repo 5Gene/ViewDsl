@@ -1,5 +1,3 @@
-@file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
-
 package osp.june.wings
 
 import android.os.Bundle
@@ -49,8 +47,7 @@ inline fun <reified T : Any> Fragment.intent(
  * }
  * ```
  */
-@kotlin.internal.InlineOnly
-inline fun Fragment.withBundle(
+fun Fragment.withBundle(
     vararg params: Pair<String, Any>
 ): Fragment {
     withBundle {
@@ -87,8 +84,7 @@ inline fun Fragment.withBundle(
 }
 
 // 感谢 Kotlin/anko
-@kotlin.internal.InlineOnly
-inline fun Bundle.inflate(it: Pair<String, Any>) {
+fun Bundle.inflate(it: Pair<String, Any>) {
     val value = it.second
     when (value) {
         is Int -> putInt(it.first, value)

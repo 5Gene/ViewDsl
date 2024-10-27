@@ -1,5 +1,3 @@
-@file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
-
 package osp.june.wings
 
 import android.app.Activity
@@ -187,8 +185,7 @@ inline fun <reified T : Any> Context.startActivityForResult(
  * )
  * ```
  */
-@kotlin.internal.InlineOnly
-inline fun Context.setActivityResult(
+fun Context.setActivityResult(
     resultCode: Int = Activity.RESULT_OK,
     vararg params: Pair<String, Any>
 ) {
@@ -252,8 +249,7 @@ inline fun intentj(
 }
 
 // 感谢 Kotlin/anko
-@kotlin.internal.InlineOnly
-inline fun Intent.inflate(it: Map.Entry<String, Any>) {
+fun Intent.inflate(it: Map.Entry<String, Any>) {
     val value = it.value
     val key = it.key
 //    androidx.core.os.BundleKt.bundleOf(kotlin.Pair<java.lang.String,? extends java.lang.Object>...)
@@ -290,8 +286,7 @@ inline fun Intent.inflate(it: Map.Entry<String, Any>) {
 
 class BitmapBinder(val bitmap: Bitmap) : Binder()
 
-@kotlin.internal.InlineOnly
-inline fun View.activity(): Activity? {
+fun View.activity(): Activity? {
     var context = context
     while (context is ContextWrapper) {
         if (context is Activity) {
@@ -303,13 +298,12 @@ inline fun View.activity(): Activity? {
 }
 
 
-@kotlin.internal.InlineOnly
 inline fun <reified T : Any> View.startActivity(params: MutableDSLMap<String, Any>.() -> Unit = {}) {
     activity()?.startActivity<T>(params)
 }
 
 
-fun Context.setSatatusBarColor(@ColorRes colorResId: Int) {
+fun Context.setStatusBarColor(@ColorRes colorResId: Int) {
     if (this is Activity) {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = findColor(colorResId)
@@ -319,7 +313,7 @@ fun Context.setSatatusBarColor(@ColorRes colorResId: Int) {
 var Activity.statusBarColor: Int
     get() = throw IllegalAccessException()
     set(value) {
-        setSatatusBarColor(value)
+        setStatusBarColor(value)
     }
 
 

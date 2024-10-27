@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package osp.june.dsl.preference
 
 import android.content.Context

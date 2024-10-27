@@ -1,5 +1,3 @@
-@file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
-
 package osp.june.wings
 
 import android.view.View
@@ -189,10 +187,10 @@ fun View.showLongSnackbar(@StringRes stringResId: Int) {
 }
 
 
-inline fun View.showActionSnackBar(
+fun View.showActionSnackBar(
     message: String,
     actionName: String,
-    noinline block: () -> Unit
+    block: () -> Unit
 ) {
     Snackbar.make(this, message, Snackbar.LENGTH_LONG)
         .setAction(actionName) {

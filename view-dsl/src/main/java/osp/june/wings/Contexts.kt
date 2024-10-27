@@ -1,5 +1,3 @@
-@file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
-
 package osp.june.wings
 
 import android.annotation.SuppressLint
@@ -28,10 +26,10 @@ fun Context.findDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this,
 
 fun Context.findDrawable(draName: String) = ContextCompat.getDrawable(this, draName.toResId(context = this))
 
-
 fun Int.toColor(context: Context) = context.findColor(this)
 
 fun Context.findColor(@ColorRes id: Int) = ContextCompat.getColor(this, id)
+
 fun Context.findColor(colorName: String) = ContextCompat.getColor(
     this,
     colorName.toResId("string", context = this)
