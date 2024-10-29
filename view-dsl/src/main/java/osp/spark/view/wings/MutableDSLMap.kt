@@ -1,4 +1,4 @@
-package osp.june.wings
+package osp.spark.view.wings
 
 class MutableDSLMap<K, V> : LinkedHashMap<K, V> {
 
@@ -12,6 +12,35 @@ class MutableDSLMap<K, V> : LinkedHashMap<K, V> {
     constructor(initialCapacity: Int, loadFactor: Float) : super(initialCapacity, loadFactor)
 
     infix fun K.put(value: V) {
+        put(this, value)
+    }
+
+    infix fun K.kv(value: V) {
+        put(this, value)
+    }
+
+    infix fun K.with(value: V) {
+        put(this, value)
+    }
+
+    /**
+     *  a * b
+     */
+    operator fun K.times(value: V) {
+        put(this, value)
+    }
+
+    /**
+     *  a - b
+     */
+    operator fun K.minus(value: V) {
+        put(this, value)
+    }
+
+    /**
+     *  a + b
+     */
+    operator fun K.plus(value: V) {
         put(this, value)
     }
 }

@@ -1,12 +1,10 @@
-package osp.june.dsl
+package osp.spark.view.dsl
 
 import android.graphics.Canvas
 import android.view.MotionEvent
 import android.view.View
-import osp.june.wings.MutableDSLMap
+import osp.spark.view.wings.MutableDSLMap
 
-
-inline fun <reified T> Any?.safeAs(): T? = this as? T
 
 interface ViewModifier {
 

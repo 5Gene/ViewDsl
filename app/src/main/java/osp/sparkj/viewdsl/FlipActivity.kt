@@ -11,18 +11,18 @@ import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.WindowCompat
-import osp.june.dsl.LayoutConstraint
-import osp.june.dsl.VModifier
-import osp.june.dsl.ViewCompose
-import osp.june.dsl.background
-import osp.june.dsl.constLayoutParams
-import osp.june.dsl.frameLayoutParams
-import osp.june.dsl.icon
-import osp.june.dsl.matchHorizontal
-import osp.june.dsl.matchVertical
-import osp.june.dsl.padding
-import osp.june.dsl.text
-import osp.june.dsl.vLayoutConstraint
+import osp.spark.view.dsl.LayoutConstraint
+import osp.spark.view.dsl.VModifier
+import osp.spark.view.dsl.ViewCompose
+import osp.spark.view.dsl.background
+import osp.spark.view.dsl.constLayoutParams
+import osp.spark.view.dsl.frameLayoutParams
+import osp.spark.view.dsl.icon
+import osp.spark.view.dsl.matchHorizontal
+import osp.spark.view.dsl.matchVertical
+import osp.spark.view.dsl.padding
+import osp.spark.view.dsl.text
+import osp.spark.view.dsl.vLayoutConstraint
 import osp.sparkj.cartoon.wings.todp
 import osp.sparkj.cartoon.wings.todpf
 
@@ -76,7 +76,7 @@ class FlipView @JvmOverloads constructor(
     private fun LayoutConstraint.flipCardWithView() {
 
         val head = vLayoutConstraint(
-            modifier = osp.june.dsl.VModifier
+            modifier = osp.spark.view.dsl.VModifier
                 .vSizeFactor(widthScale, 0)
                 .vFlipHeadView { v, p ->
                     v.alpha = 1 - p * 2
@@ -102,7 +102,7 @@ class FlipView @JvmOverloads constructor(
             }
         }
         vLayoutConstraint(
-            modifier = osp.june.dsl.VModifier
+            modifier = osp.spark.view.dsl.VModifier
                 .debug(Color.YELLOW)
                 .vSizeFactor(widthScale, .66)
                 .vFlipCardView(widthScale)
@@ -122,7 +122,7 @@ class FlipView @JvmOverloads constructor(
 
     private fun LayoutConstraint.flipCardWithDraw() {
         vLayoutConstraint(
-            modifier = osp.june.dsl.VModifier
+            modifier = osp.spark.view.dsl.VModifier
                 .vSize(-1, -1)
                 .vFlipCard(topOffset = topOffset)
         ) {

@@ -1,10 +1,6 @@
-package osp.june.wings
+package osp.spark.view.wings
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.util.Log
-import androidx.core.graphics.toColorInt
 import org.json.JSONObject
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -53,21 +49,4 @@ fun String.log(tag: String = "") {
     } else {
         Log.d("uispark", this)
     }
-}
-
-//android.graphics.Color  //这里也有很多扩展
-inline val String.toColor: Int
-    get() = toColorInt()
-
-@SuppressLint("DiscouragedApi")
-fun String.toResId(defType: String = "drawable", context: Context): Int {
-    return context.resources.getIdentifier(this, defType, context.packageName)
-}
-
-fun String.toString(activity: Activity) {
-    activity.findString(this)
-}
-
-fun String.toDrawable(activity: Activity) {
-    activity.findDrawable(this)
 }

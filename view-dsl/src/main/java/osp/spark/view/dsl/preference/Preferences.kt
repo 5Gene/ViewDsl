@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package osp.june.dsl.preference
+package osp.spark.view.dsl.preference
 
 import android.content.Context
 import android.util.AttributeSet
@@ -16,8 +16,8 @@ import androidx.preference.PreferenceViewHolder
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import androidx.preference.SwitchPreferenceCompat
-import osp.june.dsl.R
-import osp.june.dsl.ViewDslScope
+import osp.spark.view.dsl.R
+import osp.spark.view.dsl.ViewDslScope
 
 //https://developer.android.google.cn/develop/ui/views/components/settings?hl=zh-cn
 
@@ -102,17 +102,21 @@ inline fun PreferenceFragmentCompat.screen(content: @ViewDslScope PreferenceScre
 
 //PreferenceCategory并不是类似ViewGroup包裹内部preference
 //而是在PreferenceFragmentCompat中有个RecycleView统一加载所有preference,PreferenceCategory只是其中一个item显示小标题而已
-fun PreferenceScreen.category(title: Any? = null, content: @ViewDslScope PreferenceCategory.() -> Unit) {
+fun PreferenceScreen.category(title: Any? = null, content: (@ViewDslScope PreferenceCategory.() -> Unit)? = null) {
 //    val category = PreferenceCategory(context, null)
 //    addPreference(category)//必须先加进去否则会报错
 //    category.content()
     addPreference(key = "", title = title, preference = PreferenceCategory(context, null), content = content)
 }
 
+fun PreferenceGroup.linearLayout(once: Boolean = true, content: (@ViewDslScope() LinearLayout.() -> Unit)? = null) {
+    layout(R.layout.preference_layout_dsl, once, content)
+}
+
 /**
  * PreferenceCategory和PreferenceScreen都可引用
  */
-fun <T> PreferenceGroup.layout(layout: Int, once: Boolean = true, content: @ViewDslScope T.() -> Unit = { }) {
+fun <T> PreferenceGroup.layout(layout: Int, once: Boolean = true, content: (@ViewDslScope T.() -> Unit)? = null) {
     addPreference(LayoutPreference<T>(context).apply {
         layoutResource = layout
         this.content = content
@@ -120,10 +124,10 @@ fun <T> PreferenceGroup.layout(layout: Int, once: Boolean = true, content: @View
     })
 }
 
-fun PreferenceGroup.layout2(layout: Int, content: @ViewDslScope Preference.() -> Unit = { }) {
+fun PreferenceGroup.layout(layout: Int, content: (@ViewDslScope Preference.() -> Unit)? = null) {
     addPreference(Preference(context).apply {
         layoutResource = layout
-        content()
+        content?.invoke(this)
     })
 }
 
@@ -139,12 +143,6 @@ private class LayoutPreference<T>(context: Context) : Preference(context) {
     }
 }
 
-fun PreferenceGroup.linearLayout(content: @ViewDslScope() LinearLayout.() -> Unit) {
-    addPreference(LayoutPreference<LinearLayout>(context).apply {
-        layoutResource = R.layout.preference_layout_dsl
-        this.content = content
-    })
-}
 
 //直接调用构造函数：几乎没有额外的开销，非常高效。
 //反射调用构造函数：有显著的开销，特别是当需要频繁调用时，性能差异会变得更加明显。

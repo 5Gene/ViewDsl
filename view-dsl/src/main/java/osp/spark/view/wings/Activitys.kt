@@ -1,4 +1,4 @@
-package osp.june.wings
+package osp.spark.view.wings
 
 import android.app.Activity
 import android.content.Context
@@ -9,24 +9,20 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.os.Looper
-import android.os.MessageQueue.IdleHandler
 import android.os.Parcelable
 import android.provider.Settings
 import android.view.View
 import android.view.WindowManager
 import androidx.annotation.ColorRes
 import androidx.core.os.bundleOf
+import androidx.core.view.WindowInsetsControllerCompat
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-fun Activity.idleHandler(handler: IdleHandler) {
-    Looper.getMainLooper().queue.addIdleHandler(handler)
-}
-
-fun Activity.idleHandlerOnce(hander: () -> Unit) {
+fun Activity.runOnIdleHandler(once: Boolean = true, handler: () -> Unit) {
     Looper.getMainLooper().queue.addIdleHandler {
-        hander()
-        false
+        handler()
+        once
     }
 }
 
@@ -56,11 +52,11 @@ class IntentReader<V>(val translate: (Any?) -> V) : ReadOnlyProperty<Activity, V
  * 不支持解析 Bundle
  *
  * ```
- * private val key_name by jintent<String>("default value")
+ * private val key_name by intent<String>("default value")
  *
  * ```
  */
-inline fun <reified T : Any> Activity.jintent(
+inline fun <reified T : Any> Activity.intent(
     defaultValue: T
 ) = IntentReader {
     it?.safeAs<T>() ?: defaultValue
@@ -71,12 +67,11 @@ inline fun <reified T : Any> Activity.jintent(
  * 不支持解析 Bundle
  *
  * ```
- * private val key_name by jintent<String>()
+ * private val key_name by intent<String>()
  *
  * ```
  */
-inline fun <reified T : Any> Activity.jintent(
-) = IntentReader {
+inline fun <reified T : Any> Activity.intent() = IntentReader {
     it?.safeAs<T>()
 }
 
@@ -105,13 +100,13 @@ inline fun <reified T : Activity> Context.startActivity() {
  * ```
  */
 inline fun <reified T : Activity> Context.startActivity(vararg params: Pair<String, Any>) {
-    val intentJ = intentj(T::class.java) {
+    val intent = intent(T::class.java) {
         putAll(params)
     }
     if (this !is Activity) {
-        intentJ.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    startActivity(intentJ)
+    startActivity(intent)
 }
 
 /**
@@ -124,12 +119,12 @@ inline fun <reified T : Activity> Context.startActivity(vararg params: Pair<Stri
  * }
  * ```
  */
-inline fun <reified T : Any> Context.startActivity(params: MutableDSLMap<String, Any>.() -> Unit = {}) {
-    val intentJ = intentj(T::class.java, params)
+inline fun <reified T : Any> Context.startActivity(params: MutableDSLMap<String, Any>.() -> Unit) {
+    val intent = intent(T::class.java, params)
     if (this !is Activity) {
-        intentJ.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    startActivity(intentJ)
+    startActivity(intent)
 }
 
 /**
@@ -147,7 +142,7 @@ inline fun <reified T : Any> Context.startActivityForResult(
     vararg params: Pair<String, Any>
 ) {
     if (this is Activity) {
-        val intent = intentj(T::class.java) {
+        val intent = intent(T::class.java) {
             putAll(params)
         }
         startActivityForResult(intent, requestCode)
@@ -164,66 +159,26 @@ inline fun <reified T : Any> Context.startActivityForResult(
  * }
  * ```
  */
-inline fun <reified T : Any> Context.startActivityForResult(
+inline fun <reified C : Class<*>> Context.startActivityForResult(
     requestCode: Int,
     params: MutableDSLMap<String, Any>.() -> Unit = {}
 ) {
     if (this is Activity) {
-        val intent = intentj(T::class.java, params)
+        val intent = intent<C>(params)
         startActivityForResult(intent, requestCode)
     }
 }
 
-/**
- * Example：
- *
- * ```
- * setActivityResult(
- *     Activity.RESULT_OK,
- *     KEY_RESULT to "success",
- *     KEY_USER_NAME to "ByteCode"
- * )
- * ```
- */
-fun Context.setActivityResult(
-    resultCode: Int = Activity.RESULT_OK,
-    vararg params: Pair<String, Any>
-) {
-    if (this is Activity) {
-        setResult(resultCode, intentj {
-            putAll(params)
-        })
-    }
-}
 
 /**
- * Example：
- *
  * ```
- * setActivityResult(Activity.RESULT_OK) {
+ * intent {
  *     "key" to "value"
  *     "key2" to 666
  * }
  * ```
  */
-inline fun Context.setActivityResult(
-    resultCode: Int = Activity.RESULT_OK,
-    params: MutableDSLMap<String, Any>.() -> Unit
-) {
-    if (this is Activity) {
-        setResult(resultCode, intentj(params))
-    }
-}
-
-/**
- * ```
- * intentJ {
- *     "key" to "value"
- *     "key2" to 666
- * }
- * ```
- */
-inline fun Context.intentj(
+inline fun Context.intent(
     targetClass: Class<*>,
     params: MutableDSLMap<String, Any>.() -> Unit
 ): Intent = Intent(this, targetClass).apply {
@@ -232,17 +187,27 @@ inline fun Context.intentj(
     }
 }
 
+inline fun <reified C : Class<*>> Context.intent(
+    params: MutableDSLMap<String, Any>.() -> Unit
+): Intent = Intent(this, C::class.java).apply {
+    MutableDSLMap<String, Any>().apply(params).forEach {
+        inflate(it)
+    }
+}
+
 /**
  *  ```
- * intentJ {
+ * intent("action") {
  *     "key" to "value"
  *     "key2" to 666
  * }
  *  ```
  */
-inline fun intentj(
+fun intent(
+    action: String,
     params: MutableDSLMap<String, Any>.() -> Unit
 ): Intent = Intent().apply {
+    setAction(action)
     dslMapOf<String, Any>().apply(params).forEach {
         inflate(it)
     }
@@ -307,6 +272,7 @@ fun Context.setStatusBarColor(@ColorRes colorResId: Int) {
     if (this is Activity) {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = findColor(colorResId)
+        WindowInsetsControllerCompat(window, window.decorView)
     }
 }
 

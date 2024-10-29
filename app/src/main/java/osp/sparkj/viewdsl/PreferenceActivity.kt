@@ -5,17 +5,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
-import osp.june.dsl.preference.PrefCategory
-import osp.june.dsl.preference.PrefWidget
-import osp.june.dsl.preference.buildScreen
-import osp.june.dsl.preference.category
-import osp.june.dsl.preference.checkBox
-import osp.june.dsl.preference.linearLayout
-import osp.june.dsl.preference.screen
-import osp.june.dsl.preference.seekBar
-import osp.june.dsl.preference.switch
-import osp.june.dsl.preference.switchCompat
-import osp.june.dsl.text
+import osp.spark.view.dsl.preference.PrefCategory
+import osp.spark.view.dsl.preference.PrefWidget
+import osp.spark.view.dsl.preference.buildScreen
+import osp.spark.view.dsl.preference.category
+import osp.spark.view.dsl.preference.checkBox
+import osp.spark.view.dsl.preference.linearLayout
+import osp.spark.view.dsl.preference.screen
+import osp.spark.view.dsl.preference.seekBar
+import osp.spark.view.dsl.preference.switch
+import osp.spark.view.dsl.preference.switchCompat
+import osp.spark.view.dsl.text
 
 class MyPreferenceFragmentCompat : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

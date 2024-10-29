@@ -1,4 +1,4 @@
-package osp.june.wings
+package osp.spark.view.wings
 
 import android.app.Activity
 import android.content.ContentValues

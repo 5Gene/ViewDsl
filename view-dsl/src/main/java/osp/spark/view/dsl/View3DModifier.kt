@@ -1,4 +1,4 @@
-package osp.june.dsl
+package osp.spark.view.dsl
 
 import android.animation.ValueAnimator
 import android.graphics.Bitmap
@@ -9,6 +9,7 @@ import android.graphics.PointF
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import osp.spark.view.wings.safeAs
 
 import osp.sparkj.cartoon.wings.alpha
 import osp.sparkj.cartoon.wings.todpf

@@ -1,23 +1,23 @@
-package osp.june.dsl
+package osp.spark.view.dsl
 
 import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.view.MotionEvent
 import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
+import osp.spark.view.wings.safeAs
 import kotlin.math.absoluteValue
 
-val ANI_RATIO_TOUCHY = "touchY"
-val ANI_RATIO_PRESS = "press"
-val TOUCH_SLOP = "touchSlop"
-val TOUCH_EVENT = "event"
-val TOUCH_EVENT_LAST = "event_last"
-val TOUCH_EVENT_MOVE_PX = "move_px"
-val TOUCH_STATE_DOWN = "event_state_down"
+const val ANI_RATIO_TOUCHY = "touchY"
+const val ANI_RATIO_PRESS = "press"
+const val TOUCH_SLOP = "touchSlop"
+const val TOUCH_EVENT = "event"
+const val TOUCH_EVENT_LAST = "event_last"
+const val TOUCH_EVENT_MOVE_PX = "move_px"
+const val TOUCH_STATE_DOWN = "event_state_down"
 
-
-val deftime = 666L
-val presstime = 111L
+const val deftime = 666L
+const val presstime = 111L
 
 val attachAnimator: ((Locker, Boolean) -> Unit) = { locker, invalidate ->
     with(locker.view()) {

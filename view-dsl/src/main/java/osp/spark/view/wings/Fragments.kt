@@ -1,4 +1,4 @@
-package osp.june.wings
+package osp.spark.view.wings
 
 import android.os.Bundle
 import android.os.Parcelable

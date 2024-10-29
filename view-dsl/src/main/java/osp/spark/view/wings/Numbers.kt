@@ -1,4 +1,4 @@
-package osp.june.wings
+package osp.spark.view.wings
 
 import android.content.Context
 import android.content.res.Resources
@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.util.TypedValue
 import androidx.appcompat.content.res.AppCompatResources
+import java.util.concurrent.TimeUnit
 
 fun Int.vector2Bitmap(context: Context, block: ((Canvas) -> Unit)? = null): Bitmap {
     val drawable = AppCompatResources.getDrawable(context, this)!!
@@ -46,3 +47,11 @@ val Number.tosp: Float
     )
 
 fun Number.ceilToInt() = kotlin.math.ceil(this.toDouble()).toInt()
+
+fun Long.sec2Day(): Long {
+    return TimeUnit.SECONDS.toDays(this)
+}
+
+fun Long.mil2Minute(): Long {
+    return TimeUnit.MILLISECONDS.toMinutes(this)
+}

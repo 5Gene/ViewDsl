@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package osp.june.dsl
+package osp.spark.view.dsl
 
 import android.animation.LayoutTransition
 import android.animation.ValueAnimator
@@ -36,6 +36,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
+import osp.spark.view.wings.safeAs
 
 
 //限制使用最近的receiver
@@ -66,7 +67,7 @@ operator fun ViewGroup.plus(child: View): ViewGroup {
     if (findViewById<View>(child.id) != null) {
         return this
     }
-    addView(checkId())
+    addViewCheck(child, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
     //在addViewInner中
 //    if (!checkLayoutParams(params)) {
 //      这段代码会把ViewGroup.LayoutParams转化成对应布局的param比如LinearLayout的转为LinearLayout.LayoutParams
@@ -218,10 +219,7 @@ inline fun <reified T : ViewGroup> T.spacer(
         ?: (if (color == Color.TRANSPARENT) Space(context) else View(context))).apply {
         setBackgroundColor(color)
     }).also {
-        if (it.parent != null) {
-            return@also
-        }
-        addView(it.checkId(id), layoutParams ?: LayoutParams(width, height))
+        addViewCheck(it, width, height)
     }
 }
 

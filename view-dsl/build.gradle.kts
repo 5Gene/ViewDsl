@@ -1,5 +1,4 @@
-import june.wing.GroupIdMavenCentral
-import june.wing.publishMavenCentral
+import june.wing.publish5hmlA
 
 plugins {
     id("com.android.library")
@@ -7,13 +6,14 @@ plugins {
 }
 
 
-group = GroupIdMavenCentral
-version = libs.versions.gene.view.dsl.get()
+//group = GroupIdMavenCentral
+//version = libs.versions.gene.view.dsl.get()
 
-publishMavenCentral("android view dsl")
+//publishMavenCentral("android view dsl")
+publish5hmlA("android view dsl")
 
 android {
-    namespace = "osp.june.dsl"
+    namespace = "osp.spark.view.dsl"
 }
 
 dependencies {
