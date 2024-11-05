@@ -30,11 +30,11 @@ import osp.spark.view.dsl.padding
 import osp.spark.view.dsl.plus
 import osp.spark.view.dsl.spacer
 import osp.spark.view.dsl.vLayoutConstraint
+import osp.spark.view.wings.dp
+import osp.spark.view.wings.dpf
 import osp.spark.view.wings.processName
 import osp.spark.view.wings.safeAs
 import osp.spark.view.wings.toast
-import osp.sparkj.cartoon.wings.todp
-import osp.sparkj.cartoon.wings.todpf
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             this + Card(context)
-            spacer(height = 16.todp)
+            spacer(height = 16.dp())
             this + QACard(context)
         })
 
@@ -82,7 +82,7 @@ class Card @JvmOverloads constructor(
                 }
             }
 
-            spacer(height = 18.todp)
+            spacer(height = 18.dp())
         }
     }
 }
@@ -92,16 +92,16 @@ class QACard @JvmOverloads constructor(
 ) : LinearLayout(context, attrs) {
     init {
         background = GradientDrawable().apply {
-            cornerRadius = 12.todpf
+            cornerRadius = 12.dpf()
             setColor(resources.getColor(R.color.purple_200))
         }
         gravity = Gravity.CENTER_VERTICAL
-        setPadding(14.todp, 12.todp, 14.todp, 12.todp)
+        setPadding(14.dp(), 12.dp(), 14.dp(), 12.dp())
         addView(ImageView(context).apply {
             setImageResource(R.drawable.ic_launcher_foreground)
-        }, 20.todp, 20.todp)
+        }, 20.dp(), 20.dp())
 
-        addView(Space(context), 10.todp, 10.todp)
+        addView(Space(context), 10.dp(), 10.dp())
         val textView = TextView(context).apply {
             textSize = 14F
             setTextColor(Color.BLACK)

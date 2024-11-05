@@ -23,7 +23,6 @@ import android.text.style.TypefaceSpan
 import android.text.style.UnderlineSpan
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
-import osp.sparkj.cartoon.wings.todp
 
 /**
  * https://segmentfault.com/a/1190000006186341
@@ -80,7 +79,7 @@ private fun SpannableStringBuilder.addSpan(text: String, vararg style: Any?) {
 }
 
 fun SpannableStringBuilder.size(size: Int, text: String, other: Any? = null) {
-    addSpan(text, AbsoluteSizeSpan(size.todp), other)
+    addSpan(text, AbsoluteSizeSpan(size.dp()), other)
 }
 
 fun SpannableStringBuilder.color(color: Int, text: String, other: Any? = null) {

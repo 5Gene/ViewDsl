@@ -9,10 +9,10 @@ import android.graphics.PointF
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import osp.spark.view.wings.dpf
 import osp.spark.view.wings.safeAs
 
 import osp.sparkj.cartoon.wings.alpha
-import osp.sparkj.cartoon.wings.todpf
 import osp.sparkj.cartoon.wings.transForm
 
 interface FlipCard : ViewModifier {
@@ -79,7 +79,7 @@ interface FlipCard : ViewModifier {
                         translateY = -topOffsetValue,
                         scaleX = widthScaleValue,
                         rotateX = -180F * ani,
-                        locationZ = (-30).todpf,
+                        locationZ = (-30).dpf(),
                         camera = camera,
                         clip = { offsetX, offsetY ->
                             clipRect(offsetX, offsetY, -offsetX, 0F)
@@ -133,7 +133,7 @@ interface FlipCard : ViewModifier {
                     scaleX = widthScaleValue,
                     heightFactor = offsetTop / height,
                     rotateX = 180F * ani,
-                    locationZ = (-30).todpf,
+                    locationZ = (-30).dpf(),
                     camera = camera,
                     clip = { offsetX, offsetY ->
                         clipRect(offsetX, 0F, -offsetX, height + offsetY)
@@ -431,7 +431,7 @@ interface View3DModifier : FlipCard {
                 canvas.transForm(
                     camera = camera,
                     rotateX = -180F * ani,
-                    locationZ = (-30).todpf,
+                    locationZ = (-30).dpf(),
                     clip = { offsetX, offsetY ->
                         clipRect(offsetX, offsetY, -offsetX, 0F)
                     }

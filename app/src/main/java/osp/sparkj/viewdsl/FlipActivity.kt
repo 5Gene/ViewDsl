@@ -23,8 +23,8 @@ import osp.spark.view.dsl.matchVertical
 import osp.spark.view.dsl.padding
 import osp.spark.view.dsl.text
 import osp.spark.view.dsl.vLayoutConstraint
-import osp.sparkj.cartoon.wings.todp
-import osp.sparkj.cartoon.wings.todpf
+import osp.spark.view.wings.dp
+import osp.spark.view.wings.dpf
 
 class FlipActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +35,7 @@ class FlipActivity : ComponentActivity() {
     }
 }
 
-val topOffset = 126.todpf
+val topOffset = 126.dpf()
 val widthScale = .86F
 
 class FlipView @JvmOverloads constructor(
@@ -89,14 +89,14 @@ class FlipView @JvmOverloads constructor(
                 endToEnd = PARENT_ID
             }
             text(width = -1, height = -1) {
-                padding(top = 16.todp)
+                padding(top = 16.dp())
                 text = "发现新版本"
                 textSize = 30F
                 constLayoutParams {
                     width = -2
-                    height = 100.todp
+                    height = 100.dp()
                     topToTop = PARENT_ID
-                    topMargin = 35.todp
+                    topMargin = 35.dp()
                     startToStart = PARENT_ID
                 }
             }
@@ -107,9 +107,9 @@ class FlipView @JvmOverloads constructor(
                 .vSizeFactor(widthScale, .66)
                 .vFlipCardView(widthScale)
         ) {
-//            shapeRound(radiusRatio = 8.todpf)
+//            shapeRound(radiusRatio = 8.dpf())
             background {
-                cornerRadius = 13.todpf
+                cornerRadius = 13.dpf()
                 color = ColorStateList.valueOf(Color.BLUE)
             }
             constLayoutParams {
@@ -126,7 +126,7 @@ class FlipView @JvmOverloads constructor(
                 .vSize(-1, -1)
                 .vFlipCard(topOffset = topOffset)
         ) {
-            padding(horizontal = 13.todp)
+            padding(horizontal = 13.dp())
             icon(width = 0, height = 0) {
                 setImageResource(R.mipmap.img)
                 scaleType = ImageView.ScaleType.CENTER_CROP
@@ -167,7 +167,7 @@ class Touch3D @JvmOverloads constructor(
                     matchVertical()
                 }
             }
-            frameLayoutParams(200.todp, 200.todp) {
+            frameLayoutParams(200.dp(), 200.dp()) {
                 gravity = Gravity.CENTER
             }
         }
