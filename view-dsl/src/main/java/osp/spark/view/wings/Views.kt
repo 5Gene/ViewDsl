@@ -21,7 +21,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlin.coroutines.CoroutineContext
 
-
 fun Float.set(check: Float.() -> Boolean = { this > 0 }, setValue: (Float) -> Unit) {
     if (check()) {
         setValue(this)

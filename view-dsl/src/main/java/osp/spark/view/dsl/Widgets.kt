@@ -1,5 +1,3 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package osp.spark.view.dsl
 
 import android.animation.LayoutTransition
@@ -86,18 +84,39 @@ fun ViewGroup.animateLayoutChange(transition: LayoutTransition = LayoutTransitio
 }
 
 fun View.linearLayoutParams(
-    width: Int = LayoutParams.MATCH_PARENT, height: Int = LayoutParams.WRAP_CONTENT,
-    param: @ViewDslScope LinearLayout.LayoutParams.() -> Unit
-) {
-    layoutParams = LinearLayout.LayoutParams(width, height).apply(param)
-}
-
-inline fun View.frameLayoutParams(
     width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.WRAP_CONTENT,
-    block: @ViewDslScope FrameLayout.LayoutParams.() -> Unit = {}
+    weight: Float = 0F,
+    block: (@ViewDslScope LinearLayout.LayoutParams.() -> Unit)? = null
 ) {
-    layoutParams = FrameLayout.LayoutParams(width, height).apply(block)
+    val params = LinearLayout.LayoutParams(width, height)
+    params.weight = weight
+    if (block != null) {
+        params.block()
+    }
+    layoutParams = params
+}
+
+fun View.frameLayoutParams(
+    width: Int = LayoutParams.MATCH_PARENT,
+    height: Int = LayoutParams.WRAP_CONTENT,
+    gravity: Int = FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY,
+    block: (@ViewDslScope FrameLayout.LayoutParams.() -> Unit)? = null
+) {
+    val params = FrameLayout.LayoutParams(width, height)
+    params.gravity = gravity
+    if (block != null) {
+        params.block()
+    }
+    layoutParams = params
+}
+
+fun View.constLayoutParams(
+    width: Int = LayoutParams.MATCH_PARENT,
+    height: Int = LayoutParams.WRAP_CONTENT,
+    config: @ViewDslScope ConstraintLayout.LayoutParams.() -> Unit
+) {
+    layoutParams = ConstraintLayout.LayoutParams(width, height).apply(config)
 }
 
 fun ConstraintLayout.LayoutParams.matchHorizontal() {
@@ -112,21 +131,13 @@ fun ConstraintLayout.LayoutParams.matchVertical() {
     bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
 }
 
-inline fun View.constLayoutParams(
-    width: Int = LayoutParams.MATCH_PARENT,
-    height: Int = LayoutParams.WRAP_CONTENT,
-    config: @ViewDslScope ConstraintLayout.LayoutParams.() -> Unit = {}
-) {
-    layoutParams = ConstraintLayout.LayoutParams(width, height).apply(config)
-}
-
-inline fun <reified T : ViewGroup> T.row(
+inline fun ViewGroup.row(
     width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     id: Int = NO_ID,
     crossinline content: @ViewDslScope LinearLayout.() -> Unit
 ): LinearLayout {
-    return (findViewById(id) ?: LinearLayout(context)).apply(content).also {
+    return findViewById(id) ?: LinearLayout(context).apply(content).also {
         it.orientation = LinearLayout.HORIZONTAL
         addViewCheck(it, width, height)
     }
@@ -138,19 +149,19 @@ inline fun ViewGroup.column(
     id: Int = NO_ID,
     crossinline content: @ViewDslScope LinearLayout.() -> Unit
 ): LinearLayout {
-    return (findViewById(id) ?: LinearLayout(context)).apply(content).also {
+    return findViewById(id) ?: LinearLayout(context).apply(content).also {
         it.orientation = LinearLayout.VERTICAL
         addViewCheck(it, width, height)
     }
 }
 
-inline fun <reified T : ViewGroup> T.linearlayout(
+inline fun ViewGroup.linearlayout(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     id: Int = NO_ID,
     content: @ViewDslScope LinearLayout.() -> Unit
 ): LinearLayout {
-    return (findViewById(id) ?: LinearLayout(context)).apply(content).also {
+    return findViewById(id) ?: LinearLayout(context).apply(content).also {
         addViewCheck(it, width, height)
     }
 }
@@ -163,7 +174,7 @@ inline fun ViewGroup.icon(
 ): ImageView {
     //setShapeAppearanceModel()
     //setStroke...()
-    return (findViewById(id) ?: ShapeableImageView(context)).apply(config).also {
+    return findViewById(id) ?: ShapeableImageView(context).apply(config).also {
         addViewCheck(it, width, height)
     }
 }
@@ -174,7 +185,7 @@ inline fun ViewGroup.view(
     id: Int = NO_ID,
     supplyer: @ViewDslScope () -> View
 ): View {
-    return (findViewById(id) ?: supplyer()).also {
+    return findViewById(id) ?: supplyer().also {
         addViewCheck(it, width, height)
     }
 }
@@ -185,7 +196,7 @@ inline fun ViewGroup.text(
     id: Int = NO_ID,
     crossinline config: @ViewDslScope TextView.() -> Unit
 ): TextView {
-    return (findViewById(id) ?: TextView(context)).apply(config).also {
+    return findViewById(id) ?: TextView(context).apply(config).also {
         addViewCheck(it, width, height)
     }
 }
@@ -203,27 +214,39 @@ inline fun ViewGroup.button(
     //去掉button的内部上下内边距 下面两个内边距是为了 按压的时候显示深度阴影的
     //insetTop = 0
     //insetBottom = 0
-    return (findViewById(id) ?: MaterialButton(context)).apply(config).also {
+    return findViewById(id) ?: MaterialButton(context).apply(config).also {
         addViewCheck(it, width, height)
     }
 }
 
-inline fun <reified T : ViewGroup> T.spacer(
+fun ViewGroup.spacer(
+    width: Int = LayoutParams.WRAP_CONTENT,
+    height: Int = LayoutParams.WRAP_CONTENT,
+    id: Int = NO_ID,
+): View {
+    return findViewById(id) ?: (Space(context).also {
+        addViewCheck(it, width, height)
+    })
+}
+
+fun ViewGroup.line(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     id: Int = NO_ID,
     color: Int = Color.TRANSPARENT,
-    layoutParams: LayoutParams? = null
+    content: (@ViewDslScope View.() -> Unit)? = null
 ): View {
-    return ((findViewById(id)
-        ?: (if (color == Color.TRANSPARENT) Space(context) else View(context))).apply {
-        setBackgroundColor(color)
-    }).also {
+    val view = findViewById(id) ?: View(context).also {
         addViewCheck(it, width, height)
     }
+    view.setBackgroundColor(color)
+    if (content != null) {
+        view.content()
+    }
+    return view
 }
 
-inline fun <reified T : View> T.background(config: @ViewDslScope GradientDrawable.() -> Unit) {
+fun View.background(config: @ViewDslScope GradientDrawable.() -> Unit) {
     background = GradientDrawable().apply(config)
 }
 
@@ -250,7 +273,7 @@ fun StateListDrawable.default(config: @ViewDslScope GradientDrawable.() -> Unit)
     )
 }
 
-inline fun <reified T : View> T.backgroundSelector(config: @ViewDslScope StateListDrawable.() -> Unit) {
+fun View.backgroundSelector(config: @ViewDslScope StateListDrawable.() -> Unit) {
     background = StateListDrawable().apply(config)
 }
 
@@ -272,7 +295,7 @@ inline fun <reified T : View> T.backgroundSelector(config: @ViewDslScope StateLi
 //    如果未设置 android:outlineProvider="bounds" ，那么控件这个属性会默认为android:outlineProvider="background"， 这个时候View必须设置背景色，且不能为透明，否则会没有阴影。
 //    不能将elevation 或者 translationZ 的值设置的比整个View还大，这样会有阴影效果。但是阴影的渐进效果会被拉的很长很长，会看不清楚阴影效果，你会错认觉得没有阴影效果。
 //    https://www.cnblogs.com/guanxinjing/p/11151036.html
-inline fun <reified T : View> T.shape(shadowColor: Int? = null, crossinline outline: (View, Outline) -> Unit) {
+fun View.shape(shadowColor: Int? = null, outline: (View, Outline) -> Unit) {
 //        ViewOutlineProvider.BOUNDS
 //        outline.setAlpha(0.0f); 可以设置透明度
     shadowColor?.run {
@@ -288,19 +311,19 @@ inline fun <reified T : View> T.shape(shadowColor: Int? = null, crossinline outl
     }
 }
 
-inline fun <reified T : View> T.shapeRoundHalfHeightRatio(radiusRatio: Number = 1F, shadowColor: Int? = null) {
+fun View.shapeRoundHalfHeightRatio(radiusRatio: Number = 1F, shadowColor: Int? = null) {
     shape { view, outline ->
         outline.setRoundRect(0, 0, view.width, view.height, view.height / 2F * radiusRatio.toFloat())
     }
 }
 
-inline fun <reified T : View> T.shapeRound(radius: Number = 1F, shadowColor: Int? = null) {
+fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null) {
     shape { view, outline ->
         outline.setRoundRect(0, 0, view.width, view.height, radius.toFloat())
     }
 }
 
-inline fun <reified T : View> T.padding(horizontal: Number? = null, vertical: Number? = null) {
+fun View.padding(horizontal: Number? = null, vertical: Number? = null) {
     updatePadding(
         horizontal?.toInt() ?: paddingStart,
         vertical?.toInt() ?: paddingTop,
@@ -309,7 +332,7 @@ inline fun <reified T : View> T.padding(horizontal: Number? = null, vertical: Nu
     )
 }
 
-inline fun <reified T : View> T.padding(
+fun View.padding(
     left: Number = paddingStart,
     top: Number = paddingTop,
     right: Number = paddingEnd,
@@ -321,21 +344,18 @@ inline fun <reified T : View> T.padding(
     )
 }
 
-inline fun <reified T : View> T.padding(
-    padding: Number,
-) {
+fun View.padding(padding: Number) {
     setPadding(padding.toInt())
 }
 
-inline fun <reified T : View> T.visibility(visible: Boolean): T {
-    return this.apply {
-        visibility = if (visible) View.VISIBLE else View.GONE
-    }
+fun View.visibility(visible: Boolean) {
+    isVisible = visible
+//        visibility = if (visible) View.VISIBLE else View.GONE
 }
 
-inline fun <reified T : View> T.isVisible(): Boolean = isVisible
+fun View.isVisible(): Boolean = isVisible
 
-inline fun <reified T : ViewGroup> T.canvas(
+inline fun ViewGroup.canvas(
     width: Int,
     height: Int,
     id: Int = NO_ID,
@@ -344,10 +364,9 @@ inline fun <reified T : ViewGroup> T.canvas(
     return (findViewById(id) ?: CanvasView(context)).apply(drawScope).also {
         addViewCheck(it, width, height)
     }
-//    addView(CanvasView(context = context).apply(drawScope), width, height)
 }
 
-inline fun <reified T : ViewGroup> T.vLayoutConstraint(
+inline fun ViewGroup.vLayoutConstraint(
     width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.MATCH_PARENT,
     modifier: VModifier = VModifier,
@@ -366,7 +385,7 @@ class CanvasView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr), Locker by MapLocker() {
 
     private val size = RectF(0F, 0f, 0f, 0F)
-    var drawIntoCanvas: (Canvas) -> Unit = {}
+    var drawIntoCanvas: Canvas.() -> Unit = {}
     var attachToWindow: () -> Unit = {}
     var detachedFromWindow: () -> Unit = {}
     private var dispatchTouchEvent: ((MotionEvent, () -> Boolean) -> Boolean)? = null
@@ -383,7 +402,7 @@ class CanvasView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        drawIntoCanvas(canvas)
+        canvas.drawIntoCanvas()
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -438,6 +457,9 @@ class LayoutConstraint constructor(
         keepView(this)
     }
 
+    var attachToWindow: () -> Unit = {}
+    var detachedFromWindow: () -> Unit = {}
+    var drawIntoCanvas: (Canvas) -> Unit = {}
     private val size = RectF(0F, 0f, 0f, 0F)
     private val dispatchDraw: ((Canvas, (Canvas) -> Unit) -> Unit) = { canvas, superDraw ->
         drawTouchModifiers?.allDraw(this, canvas, superDraw) ?: superDraw(canvas)
@@ -445,12 +467,8 @@ class LayoutConstraint constructor(
     private var dispatchTouchEvent: ((MotionEvent, () -> Boolean) -> Boolean)? = { event, superTouch ->
         drawTouchModifiers?.allTouch(this, event, superTouch) ?: false
     }
-    var attachToWindow: () -> Unit = {}
-    var detachedFromWindow: () -> Unit = {}
-    var drawIntoCanvas: (Canvas) -> Unit = {}
     private var onInterceptTouchEvent: ((MotionEvent, () -> Boolean) -> Boolean)? = null
     private var onTouchEvent: ((MotionEvent, () -> Boolean) -> Boolean)? = null
-
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val heightExactly = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY
@@ -582,7 +600,7 @@ class LayoutConstraint constructor(
 }
 //</editor-fold>
 
-fun <T : View> T.checkId(idset: Int = NO_ID): T {
+fun View.checkId(idset: Int = NO_ID): View {
     if (id == NO_ID) {
         id = if (idset == NO_ID) generateViewId() else idset
     }
@@ -595,7 +613,6 @@ fun <T : View> T.checkId(idset: Int = NO_ID): T {
  */
 interface Locker {
     fun <T : Any> retrieve(key: String = "key", value: (() -> T)? = null): T?
-
 }
 
 fun Locker.view(): View = retrieve("view")!!

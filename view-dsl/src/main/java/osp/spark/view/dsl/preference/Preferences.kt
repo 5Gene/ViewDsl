@@ -109,7 +109,7 @@ fun PreferenceScreen.category(title: Any? = null, content: (@ViewDslScope Prefer
     addPreference(key = "", title = title, preference = PreferenceCategory(context, null), content = content)
 }
 
-fun PreferenceGroup.linearLayout(once: Boolean = true, content: (@ViewDslScope() LinearLayout.() -> Unit)? = null) {
+fun PreferenceGroup.linearLayout(once: Boolean = true, content: (@ViewDslScope LinearLayout.() -> Unit)? = null) {
     layout(R.layout.preference_layout_dsl, once, content)
 }
 
