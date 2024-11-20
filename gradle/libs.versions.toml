@@ -1,7 +1,7 @@
 #https://github.com/terrakok/kmp-awesome
 
 [versions]
-gene-view-dsl = "1.0.3"
+gene-view-dsl = "1.0.4"
 
 [libraries]
 

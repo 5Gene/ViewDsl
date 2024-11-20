@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.WindowCompat
+import osp.spark.view.dsl.Group
 import osp.spark.view.dsl.LayoutConstraint
 import osp.spark.view.dsl.VModifier
 import osp.spark.view.dsl.ViewCompose
@@ -40,7 +41,7 @@ val widthScale = .86F
 
 class FlipView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
-) : FrameLayout(context, attrs), ViewCompose {
+) : FrameLayout(context, attrs), ViewCompose, Group {
     init {
         clipChildren = false
         clipToPadding = false
@@ -89,7 +90,7 @@ class FlipView @JvmOverloads constructor(
                 endToEnd = PARENT_ID
             }
             text(width = -1, height = -1) {
-                padding(top = 16.dp())
+                padding(top = 16)
                 text = "发现新版本"
                 textSize = 30F
                 constLayoutParams {
@@ -126,7 +127,7 @@ class FlipView @JvmOverloads constructor(
                 .vSize(-1, -1)
                 .vFlipCard(topOffset = topOffset)
         ) {
-            padding(horizontal = 13.dp())
+            padding(horizontal = 13)
             icon(width = 0, height = 0) {
                 setImageResource(R.mipmap.img)
                 scaleType = ImageView.ScaleType.CENTER_CROP
@@ -167,7 +168,7 @@ class Touch3D @JvmOverloads constructor(
                     matchVertical()
                 }
             }
-            frameLayoutParams(200.dp(), 200.dp()) {
+            frameLayoutParams(200, 200) {
                 gravity = Gravity.CENTER
             }
         }

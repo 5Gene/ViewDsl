@@ -34,6 +34,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
+import osp.spark.view.wings.dp
 import osp.spark.view.wings.safeAs
 
 
@@ -43,6 +44,39 @@ import osp.spark.view.wings.safeAs
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.CLASS)
 annotation class ViewDslScope
 
+interface Group {
+
+    operator fun View.unaryMinus() {
+        (this.parent as ViewGroup).removeView(this)
+    }
+
+    operator fun View.unaryPlus(): LayoutParams {
+        val viewGroup = this@Group as ViewGroup
+        if (this in viewGroup) {
+            return layoutParams
+        }
+        viewGroup.addViewCheck(this, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        //在addViewInner中
+//    if (!checkLayoutParams(params)) {
+//      这段代码会把ViewGroup.LayoutParams转化成对应布局的param比如LinearLayout的转为LinearLayout.LayoutParams
+//        params = generateLayoutParams(params);
+//    }
+        return layoutParams
+    }
+}
+
+private class Demo @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null
+) : FrameLayout(context, attrs), Group {
+    init {
+        val tv = TextView(context)
+        -tv
+        this - tv
+        +tv
+        this + tv
+    }
+}
+
 fun ViewGroup.addViewCheck(child: View, width: Int, height: Int) {
     if (child.parent != null) {
         return
@@ -50,19 +84,12 @@ fun ViewGroup.addViewCheck(child: View, width: Int, height: Int) {
     if (child.checkId(id).layoutParams != null) {
         addView(child, child.layoutParams)
     } else {
-        addView(child, width, height)
+        addView(child, if (width > 0) width.dp() else width, if (height > 0) height.dp() else height)
     }
-}
-
-operator fun View.unaryMinus() {
-    (this.parent as ViewGroup).removeView(this)
 }
 
 operator fun ViewGroup.plus(child: View): ViewGroup {
     if (child in this) {
-        return this
-    }
-    if (findViewById<View>(child.id) != null) {
         return this
     }
     addViewCheck(child, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
@@ -81,6 +108,10 @@ operator fun ViewGroup.minus(child: View): ViewGroup {
 
 fun ViewGroup.animateLayoutChange(transition: LayoutTransition = LayoutTransition()) {
     layoutTransition = transition
+}
+
+fun <T> T.update(block: T.() -> Unit) {
+    block()
 }
 
 fun View.linearLayoutParams(
@@ -219,9 +250,9 @@ inline fun ViewGroup.button(
     }
 }
 
-fun ViewGroup.spacer(
-    width: Int = LayoutParams.WRAP_CONTENT,
-    height: Int = LayoutParams.WRAP_CONTENT,
+fun ViewGroup.space(
+    width: Int = 1,
+    height: Int = 1,
     id: Int = NO_ID,
 ): View {
     return findViewById(id) ?: (Space(context).also {
@@ -229,22 +260,56 @@ fun ViewGroup.spacer(
     })
 }
 
+fun ViewGroup.space(
+    size: Int,
+    id: Int = NO_ID,
+): View {
+    return findViewById(id) ?: (Space(context).also {
+        addViewCheck(it, size, size)
+    })
+}
+
 fun ViewGroup.line(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
-    id: Int = NO_ID,
     color: Int = Color.TRANSPARENT,
+    layoutParams: LayoutParams? = null,
+    id: Int = NO_ID,
     content: (@ViewDslScope View.() -> Unit)? = null
 ): View {
-    val view = findViewById(id) ?: View(context).also {
+    return findViewById(id) ?: View(context).also {
+        setBackgroundColor(color)
+        if (layoutParams != null) {
+            this.layoutParams = layoutParams
+        }
+        content?.invoke(this)
         addViewCheck(it, width, height)
     }
-    view.setBackgroundColor(color)
-    if (content != null) {
-        view.content()
-    }
-    return view
 }
+
+inline fun ViewGroup.canvas(
+    width: Int,
+    height: Int,
+    id: Int = NO_ID,
+    crossinline drawScope: @ViewDslScope CanvasView.() -> Unit
+): CanvasView {
+    return (findViewById(id) ?: CanvasView(context)).apply(drawScope).also {
+        addViewCheck(it, width, height)
+    }
+}
+
+inline fun ViewGroup.vLayoutConstraint(
+    width: Int = LayoutParams.MATCH_PARENT,
+    height: Int = LayoutParams.MATCH_PARENT,
+    modifier: VModifier = VModifier,
+    id: Int = NO_ID,
+    viewScope: @ViewDslScope LayoutConstraint.() -> Unit
+): ConstraintLayout {
+    return (findViewById(id) ?: LayoutConstraint(context = context, modifier)).apply(viewScope).also {
+        addViewCheck(it, width, height)
+    }
+}
+
 
 fun View.background(config: @ViewDslScope GradientDrawable.() -> Unit) {
     background = GradientDrawable().apply(config)
@@ -325,27 +390,24 @@ fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null) {
 
 fun View.padding(horizontal: Number? = null, vertical: Number? = null) {
     updatePadding(
-        horizontal?.toInt() ?: paddingStart,
-        vertical?.toInt() ?: paddingTop,
-        horizontal?.toInt() ?: paddingEnd,
-        vertical?.toInt() ?: paddingBottom
+        horizontal?.dp() ?: paddingStart,
+        vertical?.dp() ?: paddingTop,
+        horizontal?.dp() ?: paddingEnd,
+        vertical?.dp() ?: paddingBottom
     )
 }
 
 fun View.padding(
-    left: Number = paddingStart,
-    top: Number = paddingTop,
-    right: Number = paddingEnd,
-    bottom: Number = paddingBottom
+    left: Number? = null,
+    top: Number? = null,
+    right: Number? = null,
+    bottom: Number? = null
 ) {
-    updatePadding(
-        left.toInt(), top.toInt(),
-        right.toInt(), bottom.toInt()
-    )
+    throw IllegalStateException("请使用 -> View.updatePadding()")
 }
 
 fun View.padding(padding: Number) {
-    setPadding(padding.toInt())
+    setPadding(padding.dp())
 }
 
 fun View.visibility(visible: Boolean) {
@@ -354,29 +416,6 @@ fun View.visibility(visible: Boolean) {
 }
 
 fun View.isVisible(): Boolean = isVisible
-
-inline fun ViewGroup.canvas(
-    width: Int,
-    height: Int,
-    id: Int = NO_ID,
-    crossinline drawScope: @ViewDslScope CanvasView.() -> Unit
-): CanvasView {
-    return (findViewById(id) ?: CanvasView(context)).apply(drawScope).also {
-        addViewCheck(it, width, height)
-    }
-}
-
-inline fun ViewGroup.vLayoutConstraint(
-    width: Int = LayoutParams.MATCH_PARENT,
-    height: Int = LayoutParams.MATCH_PARENT,
-    modifier: VModifier = VModifier,
-    id: Int = NO_ID,
-    viewScope: @ViewDslScope LayoutConstraint.() -> Unit
-): ConstraintLayout {
-    return (findViewById(id) ?: LayoutConstraint(context = context, modifier)).apply(viewScope).also {
-        addViewCheck(it, width, height)
-    }
-}
 
 //<editor-fold desc="CanvasView">
 @SuppressLint("ViewConstructor")

@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
+import osp.spark.view.dsl.Group
 import osp.spark.view.dsl.VModifier
 import osp.spark.view.dsl.ViewCompose
 import osp.spark.view.dsl.background
@@ -28,7 +29,7 @@ import osp.spark.view.dsl.constLayoutParams
 import osp.spark.view.dsl.icon
 import osp.spark.view.dsl.padding
 import osp.spark.view.dsl.plus
-import osp.spark.view.dsl.spacer
+import osp.spark.view.dsl.space
 import osp.spark.view.dsl.vLayoutConstraint
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             this + Card(context)
-            spacer(height = 16.dp())
+            space(16)
             this + QACard(context)
         })
 
@@ -82,25 +83,25 @@ class Card @JvmOverloads constructor(
                 }
             }
 
-            spacer(height = 18.dp())
+            space(18)
         }
     }
 }
 
 class QACard @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
-) : LinearLayout(context, attrs) {
+) : LinearLayout(context, attrs), Group {
     init {
         background = GradientDrawable().apply {
             cornerRadius = 12.dpf()
             setColor(resources.getColor(R.color.purple_200))
         }
         gravity = Gravity.CENTER_VERTICAL
-        setPadding(14.dp(), 12.dp(), 14.dp(), 12.dp())
-        addView(ImageView(context).apply {
+        padding(14, 12)
+        icon(20, 20) {
             setImageResource(R.drawable.ic_launcher_foreground)
-        }, 20.dp(), 20.dp())
-
+        }
+        space(10, 10)
         addView(Space(context), 10.dp(), 10.dp())
         val textView = TextView(context).apply {
             textSize = 14F

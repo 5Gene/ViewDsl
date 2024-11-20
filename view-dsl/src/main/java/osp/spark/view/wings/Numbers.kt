@@ -28,19 +28,19 @@ private val dpToPxIntCache = mutableMapOf<Float, Int>()
 private val dpToPxFloatCache = mutableMapOf<Float, Float>()
 private val spToPxFloatCache = mutableMapOf<Float, Float>()
 
-fun Number.dp(context: Activity? = null): Int = dpToPxIntCache.getOrPut(this.toFloat()) {
+fun Number.dp(context: Activity? = sTopActivity): Int = dpToPxIntCache.getOrPut(this.toFloat()) {
     TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), (context?.resources ?: Resources.getSystem()).displayMetrics
     ).toInt()
 }
 
-fun Number.dpf(context: Activity? = null): Float = dpToPxFloatCache.getOrPut(this.toFloat()) {
+fun Number.dpf(context: Activity? = sTopActivity): Float = dpToPxFloatCache.getOrPut(this.toFloat()) {
     TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), (context?.resources ?: Resources.getSystem()).displayMetrics
     )
 }
 
-fun Number.sp(context: Activity? = null): Float = spToPxFloatCache.getOrPut(this.toFloat()) {
+fun Number.sp(context: Activity? = sTopActivity): Float = spToPxFloatCache.getOrPut(this.toFloat()) {
     TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_SP, this.toFloat(), (context?.resources ?: Resources.getSystem()).displayMetrics
     )
