@@ -26,6 +26,7 @@ import osp.spark.view.dsl.line
 import osp.spark.view.dsl.linearLayoutParams
 import osp.spark.view.dsl.padding
 import osp.spark.view.dsl.row
+import osp.spark.view.dsl.shapeRound
 import osp.spark.view.dsl.spacer
 import osp.spark.view.dsl.text
 import osp.spark.view.dsl.view
@@ -33,6 +34,7 @@ import osp.spark.view.dsl.visibility
 import osp.spark.view.wings.alpha
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
+import osp.spark.view.wings.getThemeColor
 import osp.spark.view.wings.observeOn
 import osp.spark.view.wings.removeInnerPaddingAndShadow
 import osp.spark.view.wings.safeAs
@@ -81,10 +83,18 @@ class QuestionView @JvmOverloads constructor(
             knowlage(question)
         }
         feedbackWidget()
-        background {
-            cornerRadius = 14.dpf()
-            setColor(resources.getColor(R.color.card_bg))
-        }
+//        background {
+//            cornerRadius = 14.dpf()
+//            setColor(context.getThemeColor(com.google.android.material.R.attr.colorSurface)!!)
+//        }
+        shapeRound(14.dpf(), Color.GREEN, context.getThemeColor(com.google.android.material.R.attr.colorSurface)!!)
+//        clipToOutline = true
+//        outlineProvider = object : ViewOutlineProvider() {
+//            override fun getOutline(view: View, outline: Outline) {
+//                view.setBackgroundColor(context.getThemeColor(com.google.android.material.R.attr.colorSurface)!!)
+//                outline.setRoundRect(0,0,view.width,view.height,14.dpf())
+//            }
+//        }
     }
 
     private fun voteWidget(question: Question) {

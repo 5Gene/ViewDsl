@@ -366,14 +366,20 @@ fun View.shape(shadowColor: Int? = null, outline: (View, Outline) -> Unit) {
     }
 }
 
-fun View.shapeRoundHalfHeightRatio(radiusRatio: Number = 1F, shadowColor: Int? = null) {
-    shape { view, outline ->
+fun View.shapeRoundHalfHeightRatio(radiusRatio: Number = 1F, shadowColor: Int? = null, bgColor: Int? = null) {
+    shape(shadowColor) { view, outline ->
+        if (bgColor != null) {
+            view.setBackgroundColor(bgColor)
+        }
         outline.setRoundRect(0, 0, view.width, view.height, view.height / 2F * radiusRatio.toFloat())
     }
 }
 
-fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null) {
-    shape { view, outline ->
+fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null, bgColor: Int? = null) {
+    shape(shadowColor) { view, outline ->
+        if (bgColor != null) {
+            view.setBackgroundColor(bgColor)
+        }
         outline.setRoundRect(0, 0, view.width, view.height, radius.toFloat())
     }
 }
