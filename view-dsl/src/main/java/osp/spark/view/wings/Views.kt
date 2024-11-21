@@ -3,6 +3,7 @@ package osp.spark.view.wings
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -10,8 +11,12 @@ import androidx.core.view.forEach
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
@@ -275,3 +280,39 @@ inline fun <reified B> View.tag(block: _Tag.() -> B) = _Tag(this).run(block)
 
 
 inline fun <reified B> Int.toTag(view: View) = view.getTag(this).safeAs<B>()
+
+
+@Suppress("UNCHECKED_CAST")
+inline fun <R, T> LiveData<T>.observeOn(
+    view: View,
+    crossinline transform: T.() -> R = { this as R },
+    observer: Observer<R>
+) {
+    /**
+     * 在ComponentActivity的setContent()方法中 会调用initViewTreeOwners() 之后才可以用findxxx方法
+     * findxxx 不能在view的构造方法中使用
+     */
+    (view.findViewTreeLifecycleOwner() ?: view.context.safeAs<ComponentActivity>())?.apply {
+        focusOn(transform).observe(this, observer)
+    } ?: focusOn(transform).observeForever(observer)
+
+}
+
+
+inline fun <R, T> LiveData<T>.focusOn(
+    crossinline transform: T.() -> R
+): LiveData<R> {
+    if (value == null) {
+        throw RuntimeException("LiveData must init data")
+    }
+    val outerLiveData = MediatorLiveData<R>()
+    outerLiveData.addSource(this) {
+        val pre = outerLiveData.value
+        val curr = it.transform()
+//        val curr = transform(it)
+        if (pre != curr) {
+            outerLiveData.value = curr!!
+        }
+    }
+    return outerLiveData
+}

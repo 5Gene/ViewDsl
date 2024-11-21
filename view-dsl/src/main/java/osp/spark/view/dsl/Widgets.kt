@@ -34,7 +34,6 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
-import osp.spark.view.wings.dp
 import osp.spark.view.wings.safeAs
 
 
@@ -55,7 +54,7 @@ interface Group {
         if (this in viewGroup) {
             return layoutParams
         }
-        viewGroup.addViewCheck(this, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        viewGroup.addViewCheck(id, this, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
         //在addViewInner中
 //    if (!checkLayoutParams(params)) {
 //      这段代码会把ViewGroup.LayoutParams转化成对应布局的param比如LinearLayout的转为LinearLayout.LayoutParams
@@ -77,14 +76,14 @@ private class Demo @JvmOverloads constructor(
     }
 }
 
-fun ViewGroup.addViewCheck(child: View, width: Int, height: Int) {
+fun ViewGroup.addViewCheck(id: Int, child: View, width: Int, height: Int) {
     if (child.parent != null) {
         return
     }
     if (child.checkId(id).layoutParams != null) {
         addView(child, child.layoutParams)
     } else {
-        addView(child, if (width > 0) width.dp() else width, if (height > 0) height.dp() else height)
+        addView(child, width, height)
     }
 }
 
@@ -92,7 +91,7 @@ operator fun ViewGroup.plus(child: View): ViewGroup {
     if (child in this) {
         return this
     }
-    addViewCheck(child, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+    addViewCheck(child.id, child, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
     //在addViewInner中
 //    if (!checkLayoutParams(params)) {
 //      这段代码会把ViewGroup.LayoutParams转化成对应布局的param比如LinearLayout的转为LinearLayout.LayoutParams
@@ -110,10 +109,6 @@ fun ViewGroup.animateLayoutChange(transition: LayoutTransition = LayoutTransitio
     layoutTransition = transition
 }
 
-fun <T> T.update(block: T.() -> Unit) {
-    block()
-}
-
 fun View.linearLayoutParams(
     width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.WRAP_CONTENT,
@@ -122,9 +117,7 @@ fun View.linearLayoutParams(
 ) {
     val params = LinearLayout.LayoutParams(width, height)
     params.weight = weight
-    if (block != null) {
-        params.block()
-    }
+    block?.invoke(params)
     layoutParams = params
 }
 
@@ -136,9 +129,7 @@ fun View.frameLayoutParams(
 ) {
     val params = FrameLayout.LayoutParams(width, height)
     params.gravity = gravity
-    if (block != null) {
-        params.block()
-    }
+    block?.invoke(params)
     layoutParams = params
 }
 
@@ -170,7 +161,7 @@ inline fun ViewGroup.row(
 ): LinearLayout {
     return findViewById(id) ?: LinearLayout(context).apply(content).also {
         it.orientation = LinearLayout.HORIZONTAL
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -182,7 +173,7 @@ inline fun ViewGroup.column(
 ): LinearLayout {
     return findViewById(id) ?: LinearLayout(context).apply(content).also {
         it.orientation = LinearLayout.VERTICAL
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -193,7 +184,7 @@ inline fun ViewGroup.linearlayout(
     content: @ViewDslScope LinearLayout.() -> Unit
 ): LinearLayout {
     return findViewById(id) ?: LinearLayout(context).apply(content).also {
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -206,7 +197,7 @@ inline fun ViewGroup.icon(
     //setShapeAppearanceModel()
     //setStroke...()
     return findViewById(id) ?: ShapeableImageView(context).apply(config).also {
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -217,7 +208,7 @@ inline fun ViewGroup.view(
     supplyer: @ViewDslScope () -> View
 ): View {
     return findViewById(id) ?: supplyer().also {
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -228,7 +219,7 @@ inline fun ViewGroup.text(
     crossinline config: @ViewDslScope TextView.() -> Unit
 ): TextView {
     return findViewById(id) ?: TextView(context).apply(config).also {
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -246,26 +237,29 @@ inline fun ViewGroup.button(
     //insetTop = 0
     //insetBottom = 0
     return findViewById(id) ?: MaterialButton(context).apply(config).also {
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
-fun ViewGroup.space(
-    width: Int = 1,
-    height: Int = 1,
+fun ViewGroup.spacer(
+    width: Int,
+    height: Int,
     id: Int = NO_ID,
 ): View {
     return findViewById(id) ?: (Space(context).also {
-        addViewCheck(it, width, height)
+        it.id = id
+        addViewCheck(id, it, width, height)
     })
 }
 
-fun ViewGroup.space(
-    size: Int,
+fun ViewGroup.spacer(
+    size: Int = 1,
     id: Int = NO_ID,
+    content: (@ViewDslScope Space.() -> Unit)? = null
 ): View {
     return findViewById(id) ?: (Space(context).also {
-        addViewCheck(it, size, size)
+        content?.invoke(it)
+        addViewCheck(id, it, size, size)
     })
 }
 
@@ -273,17 +267,13 @@ fun ViewGroup.line(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     color: Int = Color.TRANSPARENT,
-    layoutParams: LayoutParams? = null,
     id: Int = NO_ID,
     content: (@ViewDslScope View.() -> Unit)? = null
 ): View {
     return findViewById(id) ?: View(context).also {
-        setBackgroundColor(color)
-        if (layoutParams != null) {
-            this.layoutParams = layoutParams
-        }
-        content?.invoke(this)
-        addViewCheck(it, width, height)
+        it.setBackgroundColor(color)
+        content?.invoke(it)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -294,7 +284,7 @@ inline fun ViewGroup.canvas(
     crossinline drawScope: @ViewDslScope CanvasView.() -> Unit
 ): CanvasView {
     return (findViewById(id) ?: CanvasView(context)).apply(drawScope).also {
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -306,7 +296,7 @@ inline fun ViewGroup.vLayoutConstraint(
     viewScope: @ViewDslScope LayoutConstraint.() -> Unit
 ): ConstraintLayout {
     return (findViewById(id) ?: LayoutConstraint(context = context, modifier)).apply(viewScope).also {
-        addViewCheck(it, width, height)
+        addViewCheck(id, it, width, height)
     }
 }
 
@@ -388,12 +378,12 @@ fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null) {
     }
 }
 
-fun View.padding(horizontal: Number? = null, vertical: Number? = null) {
+fun View.padding(horizontal: Int? = null, vertical: Int? = null) {
     updatePadding(
-        horizontal?.dp() ?: paddingStart,
-        vertical?.dp() ?: paddingTop,
-        horizontal?.dp() ?: paddingEnd,
-        vertical?.dp() ?: paddingBottom
+        horizontal ?: paddingStart,
+        vertical ?: paddingTop,
+        horizontal ?: paddingEnd,
+        vertical ?: paddingBottom
     )
 }
 
@@ -406,8 +396,8 @@ fun View.padding(
     throw IllegalStateException("请使用 -> View.updatePadding()")
 }
 
-fun View.padding(padding: Number) {
-    setPadding(padding.dp())
+fun View.padding(padding: Int) {
+    setPadding(padding)
 }
 
 fun View.visibility(visible: Boolean) {

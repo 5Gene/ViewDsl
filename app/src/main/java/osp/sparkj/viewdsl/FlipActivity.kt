@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.WindowCompat
+import androidx.core.view.updatePadding
 import osp.spark.view.dsl.Group
 import osp.spark.view.dsl.LayoutConstraint
 import osp.spark.view.dsl.VModifier
@@ -90,7 +91,7 @@ class FlipView @JvmOverloads constructor(
                 endToEnd = PARENT_ID
             }
             text(width = -1, height = -1) {
-                padding(top = 16)
+                updatePadding(top = 16.dp())
                 text = "发现新版本"
                 textSize = 30F
                 constLayoutParams {
@@ -127,7 +128,7 @@ class FlipView @JvmOverloads constructor(
                 .vSize(-1, -1)
                 .vFlipCard(topOffset = topOffset)
         ) {
-            padding(horizontal = 13)
+            padding(horizontal = 13.dp())
             icon(width = 0, height = 0) {
                 setImageResource(R.mipmap.img)
                 scaleType = ImageView.ScaleType.CENTER_CROP
@@ -168,7 +169,7 @@ class Touch3D @JvmOverloads constructor(
                     matchVertical()
                 }
             }
-            frameLayoutParams(200, 200) {
+            frameLayoutParams(200.dp(), 200.dp()) {
                 gravity = Gravity.CENTER
             }
         }
