@@ -1,5 +1,6 @@
 package osp.sparkj.viewdsl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -19,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
+import com.google.android.material.internal.EdgeToEdgeUtils
 import osp.spark.view.dsl.Group
 import osp.spark.view.dsl.VModifier
 import osp.spark.view.dsl.ViewCompose
@@ -41,11 +43,16 @@ import osp.sparkj.viewdsl.qa.QuestionLayout
 import osp.sparkj.viewdsl.qa.QuestionView
 
 class MainActivity : AppCompatActivity() {
+    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        EdgeToEdgeUtils.applyEdgeToEdge(window, true)
         setContentView(ScrollView(this).apply {
+//            overScrollMode = OVER_SCROLL_NEVER
+            isVerticalScrollBarEnabled = false
             padding(horizontal = 10.dp())
             column {
+                fitsSystemWindows = true
                 this + Card(context)
                 spacer(8.dp())
                 line(width = 300.dp(), height = 1.dp(), color = Color.RED)

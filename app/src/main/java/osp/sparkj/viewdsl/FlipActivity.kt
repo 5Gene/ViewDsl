@@ -1,5 +1,6 @@
 package osp.sparkj.viewdsl
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -12,6 +13,7 @@ import androidx.activity.ComponentActivity
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.WindowCompat
 import androidx.core.view.updatePadding
+import com.google.android.material.internal.EdgeToEdgeUtils
 import osp.spark.view.dsl.Group
 import osp.spark.view.dsl.LayoutConstraint
 import osp.spark.view.dsl.VModifier
@@ -29,8 +31,10 @@ import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
 
 class FlipActivity : ComponentActivity() {
+    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        EdgeToEdgeUtils.applyEdgeToEdge(window, true)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(FlipView(this))
 //        setContentView(Touch3D(this))
@@ -51,9 +55,11 @@ class FlipView @JvmOverloads constructor(
                 .vSize(-1, -1)
                 .vFlipFather()
         ) {
+
             vLayoutConstraint(
                 modifier = VModifier
                     .vSize(-1, -1)
+                    //展开后的布局
                     .vFlipExpand(cardWidthFactor = widthScale, topOffset = topOffset)
             ) {
                 icon(width = 0, height = 0) {
@@ -69,7 +75,7 @@ class FlipView @JvmOverloads constructor(
                     }
                 }
             }
-
+            //默认布局
             flipCardWithView()
 //            flipCardWithDraw()
         }
@@ -78,7 +84,7 @@ class FlipView @JvmOverloads constructor(
     private fun LayoutConstraint.flipCardWithView() {
 
         val head = vLayoutConstraint(
-            modifier = osp.spark.view.dsl.VModifier
+            modifier = VModifier
                 .vSizeFactor(widthScale, 0)
                 .vFlipHeadView { v, p ->
                     v.alpha = 1 - p * 2
@@ -104,7 +110,7 @@ class FlipView @JvmOverloads constructor(
             }
         }
         vLayoutConstraint(
-            modifier = osp.spark.view.dsl.VModifier
+            modifier = VModifier
                 .debug(Color.YELLOW)
                 .vSizeFactor(widthScale, .66)
                 .vFlipCardView(widthScale)
@@ -124,7 +130,7 @@ class FlipView @JvmOverloads constructor(
 
     private fun LayoutConstraint.flipCardWithDraw() {
         vLayoutConstraint(
-            modifier = osp.spark.view.dsl.VModifier
+            modifier = VModifier
                 .vSize(-1, -1)
                 .vFlipCard(topOffset = topOffset)
         ) {

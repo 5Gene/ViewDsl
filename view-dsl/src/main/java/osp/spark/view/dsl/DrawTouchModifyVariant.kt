@@ -69,7 +69,6 @@ val touchPressAnimator: ((Locker, MotionEvent, () -> Boolean) -> Boolean) = { lo
             val point = locker.retrieve(TOUCH_EVENT) { PointF(0F, 0F) }!!
             point.x = event.x.coerceIn(0F, width.toFloat())
             point.y = event.y.coerceIn(0F, height.toFloat())
-            println("=============== upup   ${locker.animator(ANI_RATIO_PRESS)}")
             locker.animator(ANI_RATIO_PRESS).reverse()
         }
     }
@@ -78,8 +77,9 @@ val touchPressAnimator: ((Locker, MotionEvent, () -> Boolean) -> Boolean) = { lo
 }
 
 val touchYAnimator: ((Locker, MotionEvent, () -> Boolean) -> Boolean) = { locker, event, superTouch ->
-    with(locker.animator(ANI_RATIO_TOUCHY)) {
-        if (!isRunning) {
+    val valueAnimator = locker.animator(ANI_RATIO_TOUCHY)
+    with(valueAnimator) {
+        if (!isRunning && !isStarted) {
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     val last = locker.retrieve(TOUCH_EVENT_LAST) { PointF(0F, 0F) }!!
@@ -87,6 +87,7 @@ val touchYAnimator: ((Locker, MotionEvent, () -> Boolean) -> Boolean) = { locker
                     last.x = event.x
                     locker.retrieve(TOUCH_EVENT_MOVE_PX) { RefValue(0F) }!!.valu = 0F
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     val last = locker.retrieve(TOUCH_EVENT_LAST) { PointF(0F, 0F) }!!
                     val down = event.y - last.y > 0
@@ -119,6 +120,7 @@ val touchYAnimator: ((Locker, MotionEvent, () -> Boolean) -> Boolean) = { locker
                         setCurrentFraction(1 + fl)
                     }
                 }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     val value = animatedValue as Float
                     if (value == 1F || value == 0F) {
@@ -146,5 +148,5 @@ val touchYAnimator: ((Locker, MotionEvent, () -> Boolean) -> Boolean) = { locker
         }
     }
     superTouch()
-    true
+    !valueAnimator.isRunning && !valueAnimator.isStarted
 }

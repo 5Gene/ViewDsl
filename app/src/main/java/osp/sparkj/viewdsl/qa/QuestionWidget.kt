@@ -75,7 +75,7 @@ class QuestionLayout @JvmOverloads constructor(
     override fun Content() {
         questionTheme {
             val question = viewModel.uiState.value!!
-            Box(modifier = Modifier.padding(16.dp)) {
+            Box {
                 QuestionCard(question) {
                     if (question.isVoteType()) {
                         VoteWidget(question)
@@ -113,13 +113,17 @@ class QuestionLayout @JvmOverloads constructor(
                     Text(
                         "火热投票中",
                         modifier = Modifier
-                            .wrapContentHeight()
+                            .wrapContentSize()
                             .background(
                                 color = MaterialTheme.colors.primary,
                                 shape = RoundedCornerShape(3.dp)
                             )
-                            .padding(horizontal = 3.dp, vertical = 1.dp),
+                            .padding(horizontal = 3.dp),
                         color = Color.White,
+                        //在 Jetpack Compose 中，Text 本身没有默认的上下 padding。
+                        // 不过，由于字体渲染的方式，Text 的内容可能会看起来像有额外的间距。
+                        // 这种现象与字体的 line height（行高） 和 baseline 有关。
+                        lineHeight = 18.sp,
                         fontSize = 10.sp
                     )
                     Spacer(modifier = Modifier.weight(1F))
