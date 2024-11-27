@@ -25,15 +25,20 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.contains
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import androidx.core.view.updatePadding
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
+import osp.spark.view.wings.focusOn
 import osp.spark.view.wings.safeAs
 
 
@@ -61,6 +66,22 @@ interface Group {
 //        params = generateLayoutParams(params);
 //    }
         return layoutParams
+    }
+
+
+    @Suppress("UNCHECKED_CAST")
+    fun <R, T> LiveData<T>.focus(
+        transform: T.() -> R = { this as R },
+        observer: Observer<R>
+    ) {
+        val view = this as View
+        /**
+         * 在ComponentActivity的setContent()方法中 会调用initViewTreeOwners() 之后才可以用findxxx方法
+         * findxxx 不能在view的构造方法中使用
+         */
+        (view.findViewTreeLifecycleOwner() ?: view.context.safeAs<ComponentActivity>())?.apply {
+            focusOn(transform).observe(this, observer)
+        } ?: focusOn(transform).observeForever(observer)
     }
 }
 

@@ -16,6 +16,7 @@ import androidx.core.graphics.toColorInt
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Observer
 import com.airbnb.lottie.LottieAnimationView
+import osp.spark.view.dsl.Group
 import osp.spark.view.dsl.animateLayoutChange
 import osp.spark.view.dsl.background
 import osp.spark.view.dsl.button
@@ -35,7 +36,6 @@ import osp.spark.view.wings.alpha
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
 import osp.spark.view.wings.getThemeColor
-import osp.spark.view.wings.observeOn
 import osp.spark.view.wings.removeInnerPaddingAndShadow
 import osp.spark.view.wings.safeAs
 import osp.sparkj.viewdsl.R
@@ -60,7 +60,7 @@ class QuestionView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr) {
+) : LinearLayout(context, attrs, defStyleAttr), Group {
 
     //    private val viewModel: QuestUIViewModel by viewModels()
     private val viewModel: QuestUIViewModel = QuestUIViewModel()
@@ -496,7 +496,7 @@ class QuestionView @JvmOverloads constructor(
     }
 
     private fun <R> focus(transform: Question.() -> R, observer: Observer<R>) =
-        viewModel.uiState.observeOn(this, transform, observer)
+        viewModel.uiState.focus(transform, observer)
 
 }
 
