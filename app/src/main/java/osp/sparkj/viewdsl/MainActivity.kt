@@ -17,6 +17,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.ui.Modifier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
@@ -48,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         EdgeToEdgeUtils.applyEdgeToEdge(window, true)
         setContentView(ScrollView(this).apply {
+            Modifier.safeDrawingPadding()
 //            overScrollMode = OVER_SCROLL_NEVER
             isVerticalScrollBarEnabled = false
             padding(horizontal = 10.dp())

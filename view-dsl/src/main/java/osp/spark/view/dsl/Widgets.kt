@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package osp.spark.view.dsl
 
 import android.animation.LayoutTransition
@@ -19,6 +21,7 @@ import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.NO_ID
 import android.view.ViewGroup.generateViewId
 import android.view.ViewOutlineProvider
+import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -791,4 +794,13 @@ fun View.topLayerTip(more: ((TextView) -> Unit)? = null): MutableLiveData<String
         }
     }
     return source
+}
+
+//https://developer.android.com/develop/ui/compose/layouts/insets?hl=zh-cn
+fun ViewGroup.windowInset() {
+    setOnApplyWindowInsetsListener(object : View.OnApplyWindowInsetsListener {
+        override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+            return insets
+        }
+    })
 }
