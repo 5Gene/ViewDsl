@@ -14,22 +14,13 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams
-import android.view.ViewGroup.NO_ID
-import android.view.ViewGroup.generateViewId
-import android.view.ViewOutlineProvider
-import android.view.WindowInsets
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.Space
-import android.widget.TextView
+import android.view.*
+import android.view.ViewGroup.*
+import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.utils.widget.ImageFilterButton
+import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.contains
 import androidx.core.view.isVisible
@@ -43,6 +34,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
 import osp.spark.view.wings.focusOn
 import osp.spark.view.wings.safeAs
+import osp.sparkj.cartoon.wings.todpf
 
 
 //限制使用最近的receiver
@@ -225,6 +217,35 @@ inline fun ViewGroup.icon(
     }
 }
 
+/**
+ * altSrc	为 src 图像提供替代图像以允许交叉淡入淡出
+ * saturation	设置图像的饱和度。0 = 灰度，1 = 原始图像，2 = 高饱和度
+ * brightness	设置图像的亮度。0 = 黑色，1 = 原始，2 = 两倍亮
+ * warmth	这将调整图像的外观色温。1 = 中性，2 = 暖色，.5 = 冷
+ * contrast	  这将设置对比。1 = 不变，0 = 灰色，2 = 高对比度
+ * crossfade	设置两个图像之间的当前混合。0=src 1= altSrc 图像
+ * round       设置圆角大小
+ * roundPercent 	将曲率的拐角半径设置为较小边的分数。对于方格 1 将产生一个圆
+ * overlay	定义 alt 图像是在原始图像上淡入，还是与原始图像交叉淡化。默认值为 true。对于半透明对象，设置为 false
+ */
+inline fun ViewGroup.iconFilter(
+    width: Int = LayoutParams.WRAP_CONTENT,
+    height: Int = LayoutParams.WRAP_CONTENT,
+    id: Int = NO_ID,
+    crossinline config: @ViewDslScope ImageFilterView.() -> Unit
+): ImageView {
+    return findViewById(id) ?: ImageFilterView(context).apply(config).also {
+        it.roundPercent = 0.5f
+        it.round = 50.todpf
+        it.saturation = 1.0f //饱和度？
+        it.crossfade = 1.0f //渐变进度 0显示src,1显示alt
+        //设置两张图片
+        it.setImageResource(0)
+        it.setAltImageResource(0)
+        addViewCheck(id, it, width, height)
+    }
+}
+
 inline fun ViewGroup.view(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
@@ -261,6 +282,29 @@ inline fun ViewGroup.button(
     //insetTop = 0
     //insetBottom = 0
     return findViewById(id) ?: MaterialButton(context).apply(config).also {
+        addViewCheck(id, it, width, height)
+    }
+}
+
+/**
+ * altSrc	为 src 图像提供替代图像以允许交叉淡入淡出
+ * saturation	设置图像的饱和度。0 = 灰度，1 = 原始图像，2 = 高饱和度
+ * brightness	设置图像的亮度。0 = 黑色，1 = 原始，2 = 两倍亮
+ * warmth	这将调整图像的外观色温。1 = 中性，2 = 暖色，.5 = 冷
+ * contrast	  这将设置对比。1 = 不变，0 = 灰色，2 = 高对比度
+ * crossfade	设置两个图像之间的当前混合。0=src 1= altSrc 图像
+ * round       设置圆角大小
+ * roundPercent 	将曲率的拐角半径设置为较小边的分数。对于方格 1 将产生一个圆
+ * overlay	定义 alt 图像是在原始图像上淡入，还是与原始图像交叉淡化。默认值为 true。对于半透明对象，设置为 false
+ */
+inline fun ViewGroup.buttonFilter(
+    width: Int = LayoutParams.WRAP_CONTENT,
+    height: Int = LayoutParams.WRAP_CONTENT,
+    id: Int = NO_ID,
+    crossinline config: @ViewDslScope ImageFilterButton.() -> Unit
+): ImageButton {
+    return findViewById(id) ?: ImageFilterButton(context).apply(config).also {
+        it.round
         addViewCheck(id, it, width, height)
     }
 }
