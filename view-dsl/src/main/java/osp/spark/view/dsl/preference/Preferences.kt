@@ -7,6 +7,9 @@ import android.util.AttributeSet
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.preference.CheckBoxPreference
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
@@ -18,6 +21,7 @@ import androidx.preference.SwitchPreference
 import androidx.preference.SwitchPreferenceCompat
 import osp.spark.view.dsl.R
 import osp.spark.view.dsl.ViewDslScope
+import osp.spark.view.wings.isNotNullOrEmpty
 
 //https://developer.android.google.cn/develop/ui/views/components/settings?hl=zh-cn
 
@@ -66,6 +70,7 @@ fun <T : Preference> PreferenceGroup.addPreference(
 ) {
     addPreference(preference.apply {
         setKey(key)
+        isPersistent = !key.isNotNullOrEmpty()
         iconRes?.let {
             setIcon(it)
         }
@@ -169,6 +174,10 @@ inline fun <reified T : Preference> PreferenceGroup.addPreference(
  * ```xml
  * <item name="switchPreferenceStyle">@style/Preference.SwitchPreference.Material</item>
  * ```
+ * 如果key所在的preference没设置或者状态是off,那么此preference会被disable
+ * ```
+ * dependency = "key"
+ * ```
  */
 fun PreferenceGroup.switch(
     key: String,
@@ -217,6 +226,53 @@ fun PreferenceGroup.checkBox(
     content: @ViewDslScope (CheckBoxPreference.() -> Unit)? = null
 ) {
     addPreference(key, title, summary, iconRes, CheckBoxPreference(context, null), content)
+}
+
+fun PreferenceGroup.singleSelect(
+    key: String,
+    title: Any? = null,
+    summary: Any? = null,
+    iconRes: Int? = null,
+    content: @ViewDslScope (ListPreference.() -> Unit)? = null
+) {
+    addPreference(key, title, summary, iconRes, ListPreference(context, null), content)
+}
+
+fun PreferenceGroup.multiSelect(
+    key: String,
+    title: Any? = null,
+    summary: Any? = null,
+    iconRes: Int? = null,
+    content: @ViewDslScope (MultiSelectListPreference.() -> Unit)? = null
+) {
+    addPreference(key, title, summary, iconRes, MultiSelectListPreference(context, null), content)
+}
+
+fun PreferenceGroup.editText(
+    key: String,
+    title: Any? = null,
+    summary: Any? = null,
+    iconRes: Int? = null,
+    content: @ViewDslScope (EditTextPreference.() -> Unit)? = null
+) {
+    addPreference(key, title, summary, iconRes, EditTextPreference(context, null), content)
+}
+
+fun PreferenceGroup.seekbar(
+    key: String,
+    title: Any? = null,
+    summary: Any? = null,
+    iconRes: Int? = null,
+    content: @ViewDslScope (SeekBarPreference.() -> Unit)? = null
+) {
+    addPreference(key, title, summary, iconRes, SeekBarPreference(context, null), content)
+}
+
+fun Preference.onClick(click: () -> Unit) {
+    setOnPreferenceClickListener { _ ->
+        click()
+        true
+    }
 }
 
 interface PrefWidget {
