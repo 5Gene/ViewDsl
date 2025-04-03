@@ -14,9 +14,21 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.util.AttributeSet
-import android.view.*
-import android.view.ViewGroup.*
-import android.widget.*
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup.NO_ID
+import android.view.ViewGroup.generateViewId
+import android.view.ViewOutlineProvider
+import android.view.WindowInsets
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.Space
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.utils.widget.ImageFilterButton
@@ -69,7 +81,7 @@ interface Group {
         transform: T.() -> R = { this as R },
         observer: Observer<R>
     ) {
-        val view = this as View
+        val view = this@Group as View
         /**
          * 在ComponentActivity的setContent()方法中 会调用initViewTreeOwners() 之后才可以用findxxx方法
          * findxxx 不能在view的构造方法中使用
@@ -101,6 +113,26 @@ fun ViewGroup.addViewCheck(id: Int, child: View, width: Int, height: Int) {
     } else {
         addView(child, width, height)
     }
+}
+
+inline fun <V : View> ViewGroup.addViewCheck(
+    id: Int,
+    childSupplier: () -> V,
+    width: Int,
+    height: Int,
+    config: V.() -> Unit,
+): V {
+    val child = findViewById<V>(id) ?: childSupplier()
+    child.config()
+    if (child.parent != null) {
+        return child
+    }
+    if (child.checkId(id).layoutParams != null) {
+        addView(child, child.layoutParams)
+    } else {
+        addView(child, width, height)
+    }
+    return child
 }
 
 operator fun ViewGroup.plus(child: View): ViewGroup {
@@ -173,35 +205,32 @@ inline fun ViewGroup.row(
     width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     id: Int = NO_ID,
-    crossinline content: @ViewDslScope LinearLayout.() -> Unit
+    crossinline config: @ViewDslScope LinearLayout.() -> Unit
 ): LinearLayout {
-    return findViewById(id) ?: LinearLayout(context).apply(content).also {
-        it.orientation = LinearLayout.HORIZONTAL
-        addViewCheck(id, it, width, height)
-    }
+    return linearlayout(width, height, LinearLayout.HORIZONTAL, id, config)
 }
 
 inline fun ViewGroup.column(
     width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     id: Int = NO_ID,
-    crossinline content: @ViewDslScope LinearLayout.() -> Unit
+    crossinline config: @ViewDslScope LinearLayout.() -> Unit
 ): LinearLayout {
-    return findViewById(id) ?: LinearLayout(context).apply(content).also {
-        it.orientation = LinearLayout.VERTICAL
-        addViewCheck(id, it, width, height)
-    }
+    return linearlayout(width, height, LinearLayout.VERTICAL, id, config)
 }
 
 inline fun ViewGroup.linearlayout(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
+    orientation: Int = LinearLayout.HORIZONTAL,
     id: Int = NO_ID,
-    content: @ViewDslScope LinearLayout.() -> Unit
+    crossinline config: @ViewDslScope LinearLayout.() -> Unit
 ): LinearLayout {
-    return findViewById(id) ?: LinearLayout(context).apply(content).also {
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, {
+        val linearLayout = LinearLayout(context)
+        linearLayout.orientation = orientation
+        linearLayout
+    }, width, height, config)
 }
 
 inline fun ViewGroup.icon(
@@ -212,9 +241,7 @@ inline fun ViewGroup.icon(
 ): ImageView {
     //setShapeAppearanceModel()
     //setStroke...()
-    return findViewById(id) ?: ShapeableImageView(context).apply(config).also {
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, { ShapeableImageView(context) }, width, height, config)
 }
 
 /**
@@ -234,27 +261,26 @@ inline fun ViewGroup.iconFilter(
     id: Int = NO_ID,
     crossinline config: @ViewDslScope ImageFilterView.() -> Unit
 ): ImageView {
-    return findViewById(id) ?: ImageFilterView(context).apply(config).also {
-        it.roundPercent = 0.5f
-        it.round = 50.todpf
-        it.saturation = 1.0f //饱和度？
-        it.crossfade = 1.0f //渐变进度 0显示src,1显示alt
+    return addViewCheck(id, {
+        val imageFilterView = ImageFilterView(context)
+        imageFilterView.roundPercent = 0.5f
+        imageFilterView.round = 50.todpf
+        imageFilterView.saturation = 1.0f //饱和度？
+        imageFilterView.crossfade = 1.0f //渐变进度 0显示src,1显示alt
         //设置两张图片
-        it.setImageResource(0)
-        it.setAltImageResource(0)
-        addViewCheck(id, it, width, height)
-    }
+        imageFilterView.setImageResource(0)
+        imageFilterView.setAltImageResource(0)
+        imageFilterView
+    }, width, height, config)
 }
 
 inline fun ViewGroup.view(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     id: Int = NO_ID,
-    supplyer: @ViewDslScope () -> View
+    supplier: @ViewDslScope () -> View
 ): View {
-    return findViewById(id) ?: supplyer().also {
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, supplier, width, height) {}
 }
 
 inline fun ViewGroup.text(
@@ -263,9 +289,7 @@ inline fun ViewGroup.text(
     id: Int = NO_ID,
     crossinline config: @ViewDslScope TextView.() -> Unit
 ): TextView {
-    return findViewById(id) ?: TextView(context).apply(config).also {
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, { TextView(context) }, width, height, config)
 }
 
 inline fun ViewGroup.button(
@@ -281,9 +305,7 @@ inline fun ViewGroup.button(
     //去掉button的内部上下内边距 下面两个内边距是为了 按压的时候显示深度阴影的
     //insetTop = 0
     //insetBottom = 0
-    return findViewById(id) ?: MaterialButton(context).apply(config).also {
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, { MaterialButton(context) }, width, height, config)
 }
 
 /**
@@ -297,16 +319,13 @@ inline fun ViewGroup.button(
  * roundPercent 	将曲率的拐角半径设置为较小边的分数。对于方格 1 将产生一个圆
  * overlay	定义 alt 图像是在原始图像上淡入，还是与原始图像交叉淡化。默认值为 true。对于半透明对象，设置为 false
  */
-inline fun ViewGroup.buttonFilter(
+inline fun ViewGroup.imgFilter(
     width: Int = LayoutParams.WRAP_CONTENT,
     height: Int = LayoutParams.WRAP_CONTENT,
     id: Int = NO_ID,
     crossinline config: @ViewDslScope ImageFilterButton.() -> Unit
 ): ImageButton {
-    return findViewById(id) ?: ImageFilterButton(context).apply(config).also {
-        it.round
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, { ImageFilterButton(context) }, width, height, config)
 }
 
 fun ViewGroup.spacer(
@@ -314,21 +333,15 @@ fun ViewGroup.spacer(
     height: Int,
     id: Int = NO_ID,
 ): View {
-    return findViewById(id) ?: (Space(context).also {
-        it.id = id
-        addViewCheck(id, it, width, height)
-    })
+    return addViewCheck(id, { Space(context) }, width, height) {}
 }
 
 fun ViewGroup.spacer(
     size: Int = 1,
     id: Int = NO_ID,
-    content: (@ViewDslScope Space.() -> Unit)? = null
+    config: (@ViewDslScope Space.() -> Unit)? = null
 ): View {
-    return findViewById(id) ?: (Space(context).also {
-        content?.invoke(it)
-        addViewCheck(id, it, size, size)
-    })
+    return addViewCheck(id, { Space(context) }, size, size, config ?: {})
 }
 
 fun ViewGroup.line(
@@ -336,24 +349,22 @@ fun ViewGroup.line(
     height: Int = LayoutParams.WRAP_CONTENT,
     color: Int = Color.TRANSPARENT,
     id: Int = NO_ID,
-    content: (@ViewDslScope View.() -> Unit)? = null
+    config: (@ViewDslScope View.() -> Unit)? = null
 ): View {
-    return findViewById(id) ?: View(context).also {
-        it.setBackgroundColor(color)
-        content?.invoke(it)
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, {
+        val space = Space(context)
+        space.setBackgroundColor(color)
+        space
+    }, width, height, config ?: {})
 }
 
 inline fun ViewGroup.canvas(
     width: Int,
     height: Int,
     id: Int = NO_ID,
-    crossinline drawScope: @ViewDslScope CanvasView.() -> Unit
+    crossinline config: @ViewDslScope CanvasView.() -> Unit
 ): CanvasView {
-    return (findViewById(id) ?: CanvasView(context)).apply(drawScope).also {
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, { CanvasView(context) }, width, height, config)
 }
 
 inline fun ViewGroup.vLayoutConstraint(
@@ -361,11 +372,9 @@ inline fun ViewGroup.vLayoutConstraint(
     height: Int = LayoutParams.MATCH_PARENT,
     modifier: VModifier = VModifier,
     id: Int = NO_ID,
-    viewScope: @ViewDslScope LayoutConstraint.() -> Unit
+    config: @ViewDslScope LayoutConstraint.() -> Unit
 ): ConstraintLayout {
-    return (findViewById(id) ?: LayoutConstraint(context = context, modifier)).apply(viewScope).also {
-        addViewCheck(id, it, width, height)
-    }
+    return addViewCheck(id, { LayoutConstraint(context = context, modifier) }, width, height, config)
 }
 
 
@@ -373,8 +382,44 @@ fun View.background(config: @ViewDslScope GradientDrawable.() -> Unit) {
     background = GradientDrawable().apply(config)
 }
 
+/**
+ * ```
+ * backgroundSelector {
+ *     //必须先设置 active
+ *     active {
+ *
+ *     }
+ *     default {
+ *
+ *     }
+ * }
+ * ```
+ */
+fun View.backgroundSelector(config: @ViewDslScope StateListDrawable.() -> Unit) {
+    background = StateListDrawable().apply(config)
+}
+
+fun StateListDrawable.default(strict: Boolean = true, config: @ViewDslScope GradientDrawable.() -> Unit) {
+    if (strict && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && stateCount == 0) {
+        throw IllegalStateException("you should set active { } first, not default")
+    }
+    addState(
+        intArrayOf(),
+        GradientDrawable().apply(config)
+    )
+}
+
 fun StateListDrawable.active(config: @ViewDslScope GradientDrawable.() -> Unit) {
     val gradientDrawable = GradientDrawable().apply(config)
+//    addState(
+//         这样不行，设置无效
+//        intArrayOf(
+//            android.R.attr.state_pressed,
+//            android.R.attr.state_selected,
+//            android.R.attr.state_checked
+//        ),
+//        gradientDrawable
+//    )
     addState(
         intArrayOf(android.R.attr.state_pressed),
         gradientDrawable
@@ -387,17 +432,6 @@ fun StateListDrawable.active(config: @ViewDslScope GradientDrawable.() -> Unit) 
         intArrayOf(android.R.attr.state_checked),
         gradientDrawable
     )
-}
-
-fun StateListDrawable.default(config: @ViewDslScope GradientDrawable.() -> Unit) {
-    addState(
-        intArrayOf(),
-        GradientDrawable().apply(config)
-    )
-}
-
-fun View.backgroundSelector(config: @ViewDslScope StateListDrawable.() -> Unit) {
-    background = StateListDrawable().apply(config)
 }
 
 //    1.设置View的Z轴高度  android:elevation="10dp"   对应代码  setElevation();
@@ -421,10 +455,8 @@ fun View.backgroundSelector(config: @ViewDslScope StateListDrawable.() -> Unit) 
 fun View.shape(shadowColor: Int? = null, outline: (View, Outline) -> Unit) {
 //        ViewOutlineProvider.BOUNDS
 //        outline.setAlpha(0.0f); 可以设置透明度
-    shadowColor?.run {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            outlineSpotShadowColor = this
-        }
+    if (shadowColor != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        outlineSpotShadowColor = shadowColor
     }
     clipToOutline = true
     outlineProvider = object : ViewOutlineProvider() {
@@ -434,21 +466,17 @@ fun View.shape(shadowColor: Int? = null, outline: (View, Outline) -> Unit) {
     }
 }
 
-fun View.shapeRoundHalfHeightRatio(radiusRatio: Number = 1F, shadowColor: Int? = null, bgColor: Int? = null) {
-    shape(shadowColor) { view, outline ->
-        if (bgColor != null) {
-            view.setBackgroundColor(bgColor)
-        }
-        outline.setRoundRect(0, 0, view.width, view.height, view.height / 2F * radiusRatio.toFloat())
-    }
-}
-
 fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null, bgColor: Int? = null) {
     shape(shadowColor) { view, outline ->
         if (bgColor != null) {
             view.setBackgroundColor(bgColor)
         }
-        outline.setRoundRect(0, 0, view.width, view.height, radius.toFloat())
+        val radiusValue = radius.toFloat()
+        if (radiusValue > 1) {
+            outline.setRoundRect(0, 0, view.width, view.height, radiusValue)
+        } else {
+            outline.setRoundRect(0, 0, view.width, view.height, view.height * radiusValue)
+        }
     }
 }
 

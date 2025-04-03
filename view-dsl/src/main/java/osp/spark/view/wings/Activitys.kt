@@ -19,6 +19,9 @@ import androidx.core.view.WindowInsetsControllerCompat
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+//照片选择器
+//https://android-docs.cn/training/data-storage/shared/photopicker?hl=zh-cn#compose
+
 fun Activity.runOnIdleHandler(once: Boolean = true, handler: () -> Unit) {
     Looper.getMainLooper().queue.addIdleHandler {
         handler()
