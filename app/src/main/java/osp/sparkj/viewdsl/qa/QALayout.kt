@@ -10,7 +10,7 @@ import android.widget.FrameLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
-import osp.spark.view.dsl.Group
+import osp.spark.view.auxiliary.Group
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.safeAs
 

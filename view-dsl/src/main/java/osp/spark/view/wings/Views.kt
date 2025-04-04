@@ -1,8 +1,14 @@
 package osp.spark.view.wings
 
+import android.text.InputFilter
 import android.view.View
+import android.view.View.NO_ID
+import android.view.View.generateViewId
 import android.view.ViewGroup
+import android.view.WindowInsets
+import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -10,8 +16,9 @@ import androidx.core.view.forEach
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
+import androidx.core.view.setPadding
+import androidx.core.view.updatePadding
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -20,8 +27,9 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlin.coroutines.CoroutineContext
+import osp.spark.view.auxiliary.ViewCoroutineScope
+import osp.spark.view.auxiliary._Tag
+import osp.spark.view.dsl.text
 
 fun Float.set(check: Float.() -> Boolean = { this > 0 }, setValue: (Float) -> Unit) {
     if (check()) {
@@ -149,6 +157,34 @@ fun View.setSelectedDeep(enable: Boolean) {
     }
 }
 
+fun View.padding(horizontal: Int? = null, vertical: Int? = null) {
+    updatePadding(
+        horizontal ?: paddingStart,
+        vertical ?: paddingTop,
+        horizontal ?: paddingEnd,
+        vertical ?: paddingBottom
+    )
+}
+
+fun View.padding(
+    left: Number? = null,
+    top: Number? = null,
+    right: Number? = null,
+    bottom: Number? = null
+) {
+    throw IllegalStateException("请使用 -> View.updatePadding()")
+}
+
+fun View.padding(padding: Int) {
+    setPadding(padding)
+}
+
+fun View.visibility(visible: Boolean) {
+    isVisible = visible
+//        visibility = if (visible) View.VISIBLE else View.GONE
+}
+
+fun View.isVisible(): Boolean = isVisible
 
 fun View.visible() {
     isVisible = true
@@ -219,7 +255,7 @@ inline fun <reified VM : ViewModel> View.viewModels(
 //    )
 }
 
-private val JOB_KEY = View.generateViewId()
+private val JOB_KEY = generateViewId()
 
 val View.viewScope: CoroutineScope
     get() {
@@ -228,22 +264,11 @@ val View.viewScope: CoroutineScope
         }
     }
 
-class ViewCoroutineScope(val view: View, override val coroutineContext: CoroutineContext) : CoroutineScope,
-    View.OnAttachStateChangeListener {
-    init {
-        view.addOnAttachStateChangeListener(this)
-    }
 
-    override fun onViewAttachedToWindow(v: View) {
+inline fun <reified B> View.tag(block: _Tag.() -> B) = _Tag(this).run(block)
 
-    }
 
-    override fun onViewDetachedFromWindow(v: View) {
-        coroutineContext.cancel()
-        view.removeOnAttachStateChangeListener(this)
-    }
-
-}
+inline fun <reified B> Int.toTag(view: View) = view.getTag(this).safeAs<B>()
 
 
 fun View.topLayer(onAttach: FrameLayout.(AppCompatActivity) -> Unit) {
@@ -263,35 +288,36 @@ fun View.topLayer(onAttach: FrameLayout.(AppCompatActivity) -> Unit) {
 
 }
 
-@JvmInline
-value class _Tag(val view: View) {
-    infix fun <B> Int.line(that: B): B = that.apply { view.setTag(this@line, that) }
-
-    /**
-     * 红线只牵一次，值只设置一次
-     */
-    inline infix fun <reified B> Int.redLine(that: B): B = view.getTag(this).safeAs<B>() ?: (this line that)
-}
-
-inline fun <reified B> View.tag(block: _Tag.() -> B) = _Tag(this).run(block)
-
-
-inline fun <reified B> Int.toTag(view: View) = view.getTag(this).safeAs<B>()
-
-inline fun <R, T> LiveData<T>.focusOn(
-    crossinline transform: T.() -> R
-): LiveData<R> {
-    if (value == null) {
-        throw RuntimeException("LiveData must init data")
-    }
-    val outerLiveData = MediatorLiveData<R>()
-    outerLiveData.addSource(this) {
-        val pre = outerLiveData.value
-        val curr = it.transform()
-//        val curr = transform(it)
-        if (pre != curr) {
-            outerLiveData.value = curr!!
+fun View.topLayerTip(more: ((TextView) -> Unit)? = null): MutableLiveData<String> {
+    val source = MutableLiveData<String>()
+    topLayer {
+        text(width = -1, height = -1) {
+            textSize = 16f
+            source.observe(it) {
+                text = it
+            }
+            more?.invoke(this)
         }
     }
-    return outerLiveData
+    return source
+}
+
+//https://developer.android.com/develop/ui/compose/layouts/insets?hl=zh-cn
+fun ViewGroup.windowInset() {
+    setOnApplyWindowInsetsListener(object : View.OnApplyWindowInsetsListener {
+        override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+            return insets
+        }
+    })
+}
+
+fun View.checkId(idset: Int = NO_ID): View {
+    if (id == NO_ID) {
+        id = if (idset == NO_ID) generateViewId() else idset
+    }
+    return this
+}
+
+fun EditText.maxLength(max: Int) {
+    filters = arrayOf(InputFilter.LengthFilter(max))
 }

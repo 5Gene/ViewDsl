@@ -9,8 +9,13 @@ import android.graphics.PointF
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import osp.spark.view.auxiliary.animator
+import osp.spark.view.auxiliary.findAnimator
+import osp.spark.view.auxiliary.view
 import osp.spark.view.wings.dpf
+import osp.spark.view.wings.isVisible
 import osp.spark.view.wings.safeAs
+import osp.spark.view.wings.visibility
 
 import osp.sparkj.cartoon.wings.alpha
 import osp.sparkj.cartoon.wings.transForm

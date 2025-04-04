@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
+import osp.spark.view.auxiliary.Locker
 import osp.spark.view.wings.MutableDSLMap
 
 internal data class RefValue<D>(var valu: D)

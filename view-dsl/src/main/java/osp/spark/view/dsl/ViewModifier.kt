@@ -3,6 +3,7 @@ package osp.spark.view.dsl
 import android.graphics.Canvas
 import android.view.MotionEvent
 import android.view.View
+import osp.spark.view.auxiliary.Locker
 import osp.spark.view.wings.MutableDSLMap
 
 

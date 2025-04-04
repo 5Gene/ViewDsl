@@ -23,7 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
 import com.google.android.material.internal.EdgeToEdgeUtils
-import osp.spark.view.dsl.Group
+import osp.spark.view.auxiliary.Group
 import osp.spark.view.dsl.VModifier
 import osp.spark.view.dsl.ViewCompose
 import osp.spark.view.dsl.background
@@ -31,13 +31,13 @@ import osp.spark.view.dsl.column
 import osp.spark.view.dsl.constLayoutParams
 import osp.spark.view.dsl.icon
 import osp.spark.view.dsl.line
-import osp.spark.view.dsl.padding
 import osp.spark.view.dsl.plus
 import osp.spark.view.dsl.spacer
 import osp.spark.view.dsl.text
 import osp.spark.view.dsl.vLayoutConstraint
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
+import osp.spark.view.wings.padding
 import osp.spark.view.wings.processName
 import osp.spark.view.wings.safeAs
 import osp.spark.view.wings.toast

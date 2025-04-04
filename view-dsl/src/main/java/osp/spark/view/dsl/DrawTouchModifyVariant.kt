@@ -5,6 +5,9 @@ import android.graphics.PointF
 import android.view.MotionEvent
 import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
+import osp.spark.view.auxiliary.Locker
+import osp.spark.view.auxiliary.animator
+import osp.spark.view.auxiliary.view
 import osp.spark.view.wings.safeAs
 import kotlin.math.absoluteValue
 

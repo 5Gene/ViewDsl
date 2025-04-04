@@ -9,14 +9,13 @@ import android.graphics.Path
 import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
-import android.view.View.OnClickListener
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.LinearLayout
 import androidx.core.graphics.toColorInt
 import androidx.core.view.updatePadding
 import androidx.lifecycle.Observer
 import com.airbnb.lottie.LottieAnimationView
-import osp.spark.view.dsl.Group
+import osp.spark.view.auxiliary.Group
 import osp.spark.view.dsl.animateLayoutChange
 import osp.spark.view.dsl.background
 import osp.spark.view.dsl.button
@@ -25,19 +24,19 @@ import osp.spark.view.dsl.column
 import osp.spark.view.dsl.icon
 import osp.spark.view.dsl.line
 import osp.spark.view.dsl.linearLayoutParams
-import osp.spark.view.dsl.padding
 import osp.spark.view.dsl.row
 import osp.spark.view.dsl.shapeRound
 import osp.spark.view.dsl.spacer
 import osp.spark.view.dsl.text
-import osp.spark.view.dsl.view
-import osp.spark.view.dsl.visibility
+import osp.spark.view.dsl.viewRaw
 import osp.spark.view.wings.alpha
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
 import osp.spark.view.wings.getThemeColor
+import osp.spark.view.wings.padding
 import osp.spark.view.wings.removeInnerPaddingAndShadow
 import osp.spark.view.wings.safeAs
+import osp.spark.view.wings.visibility
 import osp.sparkj.viewdsl.R
 import osp.sparkj.viewdsl.qa.data.FeedbackBad
 import osp.sparkj.viewdsl.qa.data.FeedbackGood
@@ -350,7 +349,7 @@ class QuestionView @JvmOverloads constructor(
             }
 
             val dp20 = 23.dp()
-            val icon = view(dp20, dp20) {
+            val icon = viewRaw(dp20, dp20) {
                 LottieAnimationView(context).apply {
                     setAnimation(imageRes)
                     focus({

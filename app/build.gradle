@@ -14,12 +14,5 @@ dependencies {
     implementation vcl.androidx.preference.ktx
     implementation vcl.androidx.constraintlayout
     implementation vcl.lottie
-//    implementation libs.androidx.compose.ui
-//    implementation libs.androidx.core.ktx
-//    implementation libs.androidx.appcompat
-//    implementation libs.androidx.constraintlayout
-//    implementation libs.google.material
-//    testImplementation libs.test.junit
-//    androidTestImplementation libs.androidx.test.ext.junit
-//    androidTestImplementation libs.androidx.test.espresso.core
+    implementation vcl.gene.adapter
 }

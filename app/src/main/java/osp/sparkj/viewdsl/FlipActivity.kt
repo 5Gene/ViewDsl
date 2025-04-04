@@ -14,8 +14,8 @@ import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.PARENT_ID
 import androidx.core.view.WindowCompat
 import androidx.core.view.updatePadding
 import com.google.android.material.internal.EdgeToEdgeUtils
-import osp.spark.view.dsl.Group
-import osp.spark.view.dsl.LayoutConstraint
+import osp.spark.view.auxiliary.Group
+import osp.spark.view.auxiliary.LayoutConstraint
 import osp.spark.view.dsl.VModifier
 import osp.spark.view.dsl.ViewCompose
 import osp.spark.view.dsl.background
@@ -24,11 +24,11 @@ import osp.spark.view.dsl.frameLayoutParams
 import osp.spark.view.dsl.icon
 import osp.spark.view.dsl.matchHorizontal
 import osp.spark.view.dsl.matchVertical
-import osp.spark.view.dsl.padding
 import osp.spark.view.dsl.text
 import osp.spark.view.dsl.vLayoutConstraint
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
+import osp.spark.view.wings.padding
 
 class FlipActivity : ComponentActivity() {
     @SuppressLint("RestrictedApi")
