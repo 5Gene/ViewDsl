@@ -1,6 +1,7 @@
 package osp.spark.view.wings
 
 import android.content.ContentUris
+import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.Uri
@@ -14,6 +15,18 @@ import java.io.File
 
 //照片选择
 //https://android-docs.cn/training/data-storage/shared/photopicker?hl=zh-cn
+//https://developer.android.com/training/data-storage/shared/photopicker?hl=zh-cn
+
+/**
+ * 默认情况下，系统会授予应用对媒体文件的访问权限，直到设备重启或应用停止运行。
+ * 如果您的应用执行长时间运行的工作（例如在后台上传大型文件），您可能需要将此访问权限保留更长时间。
+ * 为此，请调用 takePersistableUriPermission() 方法
+ */
+fun Uri.takePermission() {
+    godContext.contentResolver.takePersistableUriPermission(
+        this, Intent.FLAG_GRANT_READ_URI_PERMISSION
+    )
+}
 
 fun Uri.toFile(): File? {
     try {//"image/jpeg", "image/png", "image/gif", "video/mp4"
@@ -100,7 +113,7 @@ fun Uri.toFileName(): String? {
     return result
 }
 
-private fun Uri.toPath(): String? {
+fun Uri.toPath(): String? {
     if (DocumentsContract.isDocumentUri(godContext, this)) {
         if (isExternalStorageDocument()) {
             val docId = DocumentsContract.getDocumentId(this)

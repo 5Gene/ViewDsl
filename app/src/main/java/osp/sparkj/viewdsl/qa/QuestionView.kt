@@ -36,6 +36,7 @@ import osp.spark.view.wings.getThemeColor
 import osp.spark.view.wings.padding
 import osp.spark.view.wings.removeInnerPaddingAndShadow
 import osp.spark.view.wings.safeAs
+import osp.spark.view.wings.viewModels
 import osp.spark.view.wings.visibility
 import osp.sparkj.viewdsl.R
 import osp.sparkj.viewdsl.qa.data.FeedbackBad
@@ -58,42 +59,45 @@ val colorOptionB = "#FF813A".toColorInt()
 class QuestionView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr), Group {
+) : LinearLayout(context, attrs), Group {
 
-    //    private val viewModel: QuestUIViewModel by viewModels()
-    private val viewModel: QuestUIViewModel = QuestUIViewModel()
+    private val viewModel: QuestUIViewModel by viewModels()
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             isForceDarkAllowed = true
         }
+        layoutParams = LayoutParams(-1, -2)
         orientation = VERTICAL
         val question = viewModel.uiState.value!!
         updatePadding(bottom = 12.dp())
         //标题
         titleWidget(question)
-        line(color = dividingLineColor())
+        line()
         if (question.isVoteType()) {
             //投票类型
             voteWidget(question)
         } else {
             //知识类型
-            knowlage(question)
+            knowledge(question)
         }
         feedbackWidget()
-//        background {
-//            cornerRadius = 14.dpf()
-//            setColor(context.getThemeColor(com.google.android.material.R.attr.colorSurface)!!)
-//        }
         shapeRound(14.dpf(), Color.GREEN, context.getThemeColor(com.google.android.material.R.attr.colorSurface)!!)
-//        clipToOutline = true
-//        outlineProvider = object : ViewOutlineProvider() {
-//            override fun getOutline(view: View, outline: Outline) {
-//                view.setBackgroundColor(context.getThemeColor(com.google.android.material.R.attr.colorSurface)!!)
-//                outline.setRoundRect(0,0,view.width,view.height,14.dpf())
-//            }
-//        }
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        //MATCH_PARENT -> EXACTLY,填满父布局，给多少用多少
+        //WRAP_CONTENT -> AT_MOST,需要多少用多少，但是不能超过给定的大小
+        //MeasureSpec.getSize(),获取可以使用的具体大小
+        println(
+            "EXACTLY:${MeasureSpec.EXACTLY},UNSPECIFIED:${MeasureSpec.UNSPECIFIED},AT_MOST:${MeasureSpec.AT_MOST} =>${
+                MeasureSpec.getMode(
+                    widthMeasureSpec
+                )
+            }"
+        )
+        println("====== size:${MeasureSpec.getSize(widthMeasureSpec)}========")
     }
 
     private fun voteWidget(question: Question) {
@@ -196,7 +200,7 @@ class QuestionView @JvmOverloads constructor(
                 }
             }
             if (!question.isAnswered()) {
-                voteOptionsWidtet(this, question)
+                voteOptionsWidget(this, question)
             }
 
             animateLayoutChange()
@@ -271,7 +275,7 @@ class QuestionView @JvmOverloads constructor(
         }
     }
 
-    private fun voteOptionsWidtet(parent: LinearLayout, question: Question) {
+    private fun voteOptionsWidget(parent: LinearLayout, question: Question) {
         parent.row {
             focus({ !isAnswered() }) {
                 visibility(it)
@@ -308,7 +312,7 @@ class QuestionView @JvmOverloads constructor(
         }
     }
 
-    private fun knowlage(question: Question) {
+    private fun knowledge(question: Question) {
         column {
             padding(horizontal = 16.dp(), vertical = 16.dp())
             text {

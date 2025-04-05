@@ -1,5 +1,7 @@
 package osp.spark.view.wings
 
+import android.text.format.DateUtils
+import android.text.format.Formatter
 import android.util.Log
 import org.json.JSONObject
 import java.math.BigInteger
@@ -50,3 +52,11 @@ fun String.log(tag: String = "") {
         Log.d("uispark", this)
     }
 }
+
+fun Number.showFileSize() = Formatter.formatFileSize(godContext, toLong())
+
+fun Number.showFileSizeShort() = Formatter.formatShortFileSize(godContext, toLong())
+
+fun Long.showTime() = DateUtils.formatDateTime(godContext, this, DateUtils.FORMAT_SHOW_DATE and DateUtils.FORMAT_SHOW_TIME)
+
+

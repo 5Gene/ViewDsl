@@ -16,9 +16,11 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.toColorInt
@@ -41,6 +43,8 @@ import osp.spark.view.wings.padding
 import osp.spark.view.wings.processName
 import osp.spark.view.wings.safeAs
 import osp.spark.view.wings.toast
+import osp.sparkj.viewdsl.compose.MediaSelectLayout
+import osp.sparkj.viewdsl.compose.MediaSelectViewModel
 import osp.sparkj.viewdsl.qa.QuestionLayout
 import osp.sparkj.viewdsl.qa.QuestionView
 
@@ -48,6 +52,8 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val viewModel by viewModels<MediaSelectViewModel>()
+        viewModel.registerForActivityResult(this::registerForActivityResult)
         EdgeToEdgeUtils.applyEdgeToEdge(window, true)
         setContentView(ScrollView(this).apply {
             Modifier.safeDrawingPadding()
@@ -66,6 +72,11 @@ class MainActivity : AppCompatActivity() {
                 spacer(8.dp())
                 this + QuestionView(context)
                 spacer(18.dp())
+                this + ComposeView(context = context).apply {
+                    setContent {
+                        MediaSelectLayout()
+                    }
+                }
             }
         })
 

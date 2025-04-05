@@ -30,9 +30,9 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
 import osp.spark.view.auxiliary.CanvasView
 import osp.spark.view.auxiliary.LayoutConstraint
+import osp.spark.view.wings.alpha
 import osp.spark.view.wings.checkId
 import osp.sparkj.cartoon.wings.todpf
-
 
 //限制使用最近的receiver
 //对于有receiver的方法(A.()->Unit),限定作用域只在此方法内,方法内部的方法无法访问
@@ -294,9 +294,9 @@ fun ViewGroup.spacer(
 }
 
 fun ViewGroup.line(
-    width: Int = LayoutParams.WRAP_CONTENT,
+    width: Int = LayoutParams.MATCH_PARENT,
     height: Int = LayoutParams.WRAP_CONTENT,
-    color: Int = Color.TRANSPARENT,
+    color: Int = Color.BLACK.alpha(.04F),
     id: Int = NO_ID,
     config: (@ViewDslScope View.() -> Unit)? = null
 ): View {
@@ -428,4 +428,17 @@ fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null, bgColor: Int?
         }
     }
 }
+
+
+//MATCH_PARENT，那么MeasureSpec模式通常是 EXACTLY，因为父容器给出了一个明确的尺寸。
+//WRAP_CONTENT，那么MeasureSpec模式通常是 AT_MOST，这意味着视图可以自行决定其大小，但不能超过某个最大值。
+//比如自定义视图需要测量未指定大小的内容时，可能会遇到 UNSPECIFIED 模式。
+
+//EXACTLY：当父容器对子视图提出了一个确切的尺寸要求时使用，对应于MATCH_PARENT或具体的dp值。此时子视图应当按照这个确切的尺寸进行布局。
+//AT_MOST：允许子视图最多达到指定的尺寸。这通常与WRAP_CONTENT一起使用，意味着子视图可以自由决定自己的大小，但不能超过给定的最大值。
+//UNSPECIFIED：父容器不对子视图的尺寸做任何限制，这种情况比较少见，通常出现在某些特殊场景下，如测量列表项的高度时。
+
+//MATCH_PARENT 和 WRAP_CONTENT 决定了视图希望如何布局自身，
+//EXACTLY、AT_MOST 和 UNSPECIFIED 则是系统用来传达具体布局约束的方式。
+
 

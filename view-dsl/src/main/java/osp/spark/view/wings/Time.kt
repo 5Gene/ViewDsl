@@ -16,7 +16,6 @@ fun getTodayStartMillis(): Long {
     // 获取当前时间的时区偏移（包括夏令时）
     val timeZone = java.util.TimeZone.getDefault()
     val offset = timeZone.getOffset(currentTimeMillis)
-
     // 计算今天开始时间的毫秒数
     return (currentTimeMillis + offset) / MILLIS_IN_A_DAY * MILLIS_IN_A_DAY - offset
 }
