@@ -12,6 +12,7 @@ dependencies {
     implementation project(':view-dsl')
     implementation vcl.gene.cartoon
     implementation vcl.androidx.preference.ktx
+//    implementation vcl.androidx.activity.ktx
     implementation vcl.androidx.constraintlayout
     implementation vcl.lottie
     implementation vcl.gene.adapter

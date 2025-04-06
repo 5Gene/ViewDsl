@@ -32,7 +32,7 @@ import osp.spark.view.auxiliary.CanvasView
 import osp.spark.view.auxiliary.LayoutConstraint
 import osp.spark.view.wings.alpha
 import osp.spark.view.wings.checkId
-import osp.sparkj.cartoon.wings.todpf
+import osp.spark.view.wings.dpf
 
 //限制使用最近的receiver
 //对于有receiver的方法(A.()->Unit),限定作用域只在此方法内,方法内部的方法无法访问
@@ -213,7 +213,7 @@ inline fun ViewGroup.iconFilter(
     return addViewCheck(id, {
         val imageFilterView = ImageFilterView(context)
         imageFilterView.roundPercent = 0.5f
-        imageFilterView.round = 50.todpf
+        imageFilterView.round = 50.dpf()
         imageFilterView.saturation = 1.0f //饱和度？
         imageFilterView.crossfade = 1.0f //渐变进度 0显示src,1显示alt
         //设置两张图片

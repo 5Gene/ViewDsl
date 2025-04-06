@@ -22,4 +22,6 @@ dependencies {
     api(vcl.google.material)
     api(vcl.androidx.constraintlayout)
     api(vcl.androidx.preference.ktx)
+    api(vcl.androidx.activity.ktx)
+    api(vcl.androidx.appcompat)
 }
