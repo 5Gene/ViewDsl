@@ -20,6 +20,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.utils.widget.ImageFilterButton
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -147,6 +148,28 @@ inline fun ViewGroup.recycleView(
         val recyclerView = RecyclerView(context)
         recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
         recyclerView
+    }, width, height, config)
+}
+
+inline fun ViewGroup.toolBar(
+    width: Int = LayoutParams.MATCH_PARENT,
+    height: Int = LayoutParams.WRAP_CONTENT,
+    id: Int = NO_ID,
+    crossinline config: @ViewDslScope Toolbar.() -> Unit
+): Toolbar {
+    return addViewCheck(id, {
+        Toolbar(context)
+    }, width, height, config)
+}
+
+inline fun ViewGroup.box(
+    width: Int = LayoutParams.MATCH_PARENT,
+    height: Int = LayoutParams.WRAP_CONTENT,
+    id: Int = NO_ID,
+    crossinline config: @ViewDslScope FrameLayout.() -> Unit
+): FrameLayout {
+    return addViewCheck(id, {
+        FrameLayout(context)
     }, width, height, config)
 }
 

@@ -4,6 +4,7 @@ import june.wing.publishMavenCentral
 plugins {
     id("com.android.library")
     alias(vcl.plugins.gene.android)
+    alias(vcl.plugins.gene.compose)
 }
 
 
@@ -19,6 +20,7 @@ android {
 
 dependencies {
     api(vcl.gene.cartoon)
+    api(vcl.gene.adapter)
     api(vcl.google.material)
     api(vcl.androidx.constraintlayout)
     api(vcl.androidx.preference.ktx)

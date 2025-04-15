@@ -39,3 +39,18 @@ inline fun <R, T> LiveData<T>.mapNotNull(
     }
     return outerLiveData
 }
+
+fun <T> LiveData<T>.classChange(): LiveData<T> {
+    if (value == null) {
+        throw RuntimeException("LiveData must init data")
+    }
+    val outerLiveData = MediatorLiveData<T>()
+    outerLiveData.addSource(this) {
+        val preClass = outerLiveData.value?.javaClass
+        val currClass = it?.javaClass
+        if (preClass != currClass) {
+            outerLiveData.value = it
+        }
+    }
+    return outerLiveData
+}
