@@ -1,6 +1,5 @@
 package osp.spark.view.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import android.widget.LinearLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.preference.PreferenceDialogFragmentCompat
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import osp.spark.view.dsl.preference.screen
@@ -31,16 +29,6 @@ abstract class PrefDslFragment<D>(val data: D) : PreferenceFragmentCompat() {
         screen {
             onShowContent(data)
         }
-    }
-
-    abstract fun PreferenceScreen.onShowContent(data: D)
-}
-
-abstract class PrefDslDialogFragment<D>(val data: D) : PreferenceDialogFragmentCompat() {
-
-
-    override fun onCreateDialogView(context: Context): View? {
-        return super.onCreateDialogView(context)
     }
 
     abstract fun PreferenceScreen.onShowContent(data: D)

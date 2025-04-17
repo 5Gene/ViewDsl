@@ -27,7 +27,9 @@ import osp.spark.view.dsl.box
 import osp.spark.view.dsl.frameLayoutParams
 import osp.spark.view.dsl.toolBar
 import osp.spark.view.ui.UIState.Loading
+import osp.spark.view.wings.classChange
 import osp.spark.view.wings.log
+import osp.spark.view.wings.mapNotNull
 import java.lang.reflect.ParameterizedType
 import kotlin.concurrent.thread
 
@@ -35,16 +37,12 @@ data class UIStateException(val code: Int, val msg: String) : Exception(msg, nul
 
 sealed interface UIState {
     data class Loading(val tips: String) : UIState
-    data class Success<D>(val data: D? = null) : UIState
+    data class Success<D>(val loadingDialog: Boolean = false, val data: D? = null) : UIState
     data class Empty(val illustration: Int, val tips: String) : UIState
     data class Error(val illustration: Int? = null, val tips: String? = null) : UIState
 }
 
 interface UIEvent {
-    //界面中间显示loading弹簧
-    data class Loading(val tips: String) : UIEvent
-    object None : UIEvent
-
     //界面弹出toast
     data class Toast(val tips: String) : UIEvent
 }
@@ -59,16 +57,14 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
 
     //<editor-fold desc="UI事件">
     private val _uiEvent = MutableLiveData<UIEvent>()
-    val uiEvent: LiveData<UIEvent> = _uiEvent
+    val uiEvent: LiveData<UIEvent> = _uiEvent.distinctUntilChanged()//去掉粘性
     //</editor-fold>
 
     open fun initialState(): UIState = Loading("")
 
     //扩展方法，更新MutableLiveData中数据的某项内容
     protected fun MutableLiveData<UIState>.update(change: UIState.() -> UIState) {
-        thread {
-            value = value!!.change()
-        }
+        postValue(value!!.change())
     }
 
     /**
@@ -87,7 +83,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
                     showEmpty(0, "")
                     return@launch
                 }
-                showSucceed { result }
+                showSucceed(result)
             } catch (e: Exception) {
                 e.message?.log("request")
                 when (e) {
@@ -117,14 +113,8 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
         _uiState.postValue(UIState.Loading(""))
     }
 
-    fun showSucceed(update: (D?) -> D) {
-        _uiState.update {
-            if (this is UIState.Success<*>) {
-                UIState.Success(update(data!! as D))
-            } else {
-                UIState.Success(update(null))
-            }
-        }
+    protected fun showSucceed(data: D) {
+        _uiState.postValue(UIState.Success(data = data))
     }
 
     protected fun showEmpty(illustration: Int, tips: String) {
@@ -135,10 +125,13 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
         _uiState.postValue(UIState.Error(illustration, tips))
     }
 
+    /**
+     * UI操作后更新局部数据对应更新UI局部
+     */
     protected fun update(update: D.() -> D) {
         _uiState.update {
             if (this is UIState.Success<*>) {
-                UIState.Success(update(data!! as D))
+                UIState.Success(data = update(data!! as D))
             } else {
                 throw IllegalStateException("must be invoke in success state")
             }
@@ -146,25 +139,37 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
     }
 
 
-    private fun eventLoading() {
-        _uiEvent.postValue(UIEvent.Loading(""))
+    private fun showLoadingDialog() {
+        _uiState.update {
+            if (this is UIState.Success<*>) {
+                copy(loadingDialog = true)
+            } else {
+                throw IllegalStateException("must be invoke in success state")
+            }
+        }
     }
 
-    private fun eventFinishLoading() = _uiEvent.postValue(UIEvent.None)
+    private fun finishLoadingDialog() = _uiState.update {
+        if (this is UIState.Success<*>) {
+            copy(loadingDialog = false)
+        } else {
+            throw IllegalStateException("must be invoke in success state")
+        }
+    }
 
     /**
      * UI点击控件，执行耗时操作的时候，显示加载中弹窗，执行完之后隐藏弹窗
      */
-    fun doWithLoadingEvent(onError: (() -> Unit)? = null, action: suspend () -> Unit) {
+    fun doWithLoadingDialog(onError: (() -> Unit)? = null, action: suspend () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                eventLoading()
+                showLoadingDialog()
                 action()
             } catch (e: Exception) {
                 e.message?.log("StateViewModel")
                 onError?.invoke()
             } finally {
-                eventFinishLoading()
+                finishLoadingDialog()
             }
         }
     }
@@ -175,6 +180,13 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
         }
     }
 
+    /**
+     * 箭头UI数据的局部更新
+     */
+    fun focusOn(transform: D.() -> R?): LiveData<R> = uiState.mapNotNull {
+        (this as UIState.Success<D>).data!!.transform()
+    }
+
     override fun onCleared() {
         super.onCleared()
         "BasicStateViewModel $this onCleared ..".log()
@@ -183,7 +195,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
 
 abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
 
-    var subContentView: View? = null
+    private var subContentView: View? = null
 
     /**
      * 抽象方法 title 返回活动标题的资源 ID。
@@ -235,7 +247,7 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
             }
             box(id = showId) {
                 // 监听设备连接状态变化
-                vm.uiState.distinctUntilChanged()
+                vm.uiState.classChange()
                     .observe(this@StateActivity) { state ->
                         onUiStateChange(state, showId)
                     }

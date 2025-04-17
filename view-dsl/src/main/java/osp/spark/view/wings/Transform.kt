@@ -7,9 +7,6 @@ import androidx.lifecycle.MediatorLiveData
 inline fun <R, T> LiveData<T>.focusOn(
     crossinline transform: T.() -> R
 ): LiveData<R> {
-    if (value == null) {
-        throw RuntimeException("LiveData must init data")
-    }
     val outerLiveData = MediatorLiveData<R>()
     outerLiveData.addSource(this) {
         val pre = outerLiveData.value
@@ -25,9 +22,6 @@ inline fun <R, T> LiveData<T>.focusOn(
 inline fun <R, T> LiveData<T>.mapNotNull(
     crossinline transform: T.() -> R?
 ): LiveData<R> {
-    if (value == null) {
-        throw RuntimeException("LiveData must init data")
-    }
     val outerLiveData = MediatorLiveData<R>()
     outerLiveData.addSource(this) {
         val pre = outerLiveData.value
@@ -41,9 +35,12 @@ inline fun <R, T> LiveData<T>.mapNotNull(
 }
 
 fun <T> LiveData<T>.classChange(): LiveData<T> {
-    if (value == null) {
-        throw RuntimeException("LiveData must init data")
-    }
+//    val outerLiveData = if (isInitialized) {
+//        MediatorLiveData<T>(value)
+//    } else {
+//        MediatorLiveData<T>()
+//    }
+
     val outerLiveData = MediatorLiveData<T>()
     outerLiveData.addSource(this) {
         val preClass = outerLiveData.value?.javaClass

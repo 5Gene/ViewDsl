@@ -2,9 +2,11 @@ package osp.spark.view.wings
 
 import android.content.Context
 import android.content.res.TypedArray
+import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.core.content.withStyledAttributes
 import com.google.android.material.color.MaterialColors
 
 /**
@@ -64,11 +66,25 @@ fun Context.getAttrColor(@AttrRes attr: Int): Int? {
     var attrColor = 0
     try {
         getAttrsValues(attr) {
-            attrColor = getColor(0)
+            attrColor = it.getColor(0, -1)
         }
         return attrColor
     } catch (e: Exception) {
-        return null
+        e.printStackTrace()
+        return getThemeAttrValue(attr)?.data
+    }
+}
+
+fun Context.getAttrString(@AttrRes attr: Int): String? {
+    var attrString: String? = null
+    try {
+        getAttrsValues(attr) {
+            attrString = it.getString(0)
+        }
+        return attrString
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return getThemeAttrValue(attr)?.string?.toString()
     }
 }
 
@@ -87,11 +103,23 @@ fun Context.getAttrColor(@AttrRes attr: Int): Int? {
  * ```
  * 都没取到会抛出Npe
  */
-fun Context.getAttrsValues(@AttrRes vararg attrs: Int, reader: TypedArray.() -> Unit) {
-    val readAttrs = intArrayOf(*attrs)
-    val obtainStyledAttributes = obtainStyledAttributes(readAttrs)
-    reader(obtainStyledAttributes)
-    obtainStyledAttributes.recycle()
+fun Context.getAttrsValues(@AttrRes vararg attrs: Int, reader: (TypedArray) -> Unit) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        obtainStyledAttributes(intArrayOf(*attrs)).use {
+            reader(it)
+        }
+//        withStyledAttributes(0, intArrayOf(*attrs), reader)
+    } else {
+//        obtainStyledAttributes(intArrayOf(*attrs)).apply(reader).recycle()
+        withStyledAttributes(0, intArrayOf(*attrs), reader)
+//public inline fun Context.withStyledAttributes(
+//    set: AttributeSet? = null,
+//    attrs: IntArray,
+//    @AttrRes defStyleAttr: Int = 0,
+//    @StyleRes defStyleRes: Int = 0,
+//    block: TypedArray.() -> Unit
+//)
+    }
 }
 
 

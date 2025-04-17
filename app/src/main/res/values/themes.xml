@@ -17,6 +17,7 @@
         <item name="switchPreferenceCompatStyle">@style/myPreferenceCompatStyle</item>
         <item name="switchPreferenceStyle">@style/myPreferenceStyle</item>
         <item name="preferenceCategoryStyle">@style/myPreferenceCategoryStyleStyle</item>
+        <item name="state_fragment_full_class">osp.spark.view.ui.StateFragment</item>
     </style>
 
     <style name="myPreferenceCategoryStyleStyle" parent="Preference.Category.Material">

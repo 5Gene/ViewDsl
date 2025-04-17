@@ -39,9 +39,14 @@ import osp.spark.view.dsl.text
 import osp.spark.view.dsl.vLayoutConstraint
 import osp.spark.view.wings.dp
 import osp.spark.view.wings.dpf
+import osp.spark.view.wings.getAttrColor
+import osp.spark.view.wings.getAttrString
+import osp.spark.view.wings.getThemeAttrValue
+import osp.spark.view.wings.getThemeColor
 import osp.spark.view.wings.padding
 import osp.spark.view.wings.processName
 import osp.spark.view.wings.safeAs
+import osp.spark.view.wings.toAttrId
 import osp.spark.view.wings.toast
 import osp.sparkj.viewdsl.compose.MediaSelectLayout
 import osp.sparkj.viewdsl.compose.MediaSelectViewModel
@@ -52,6 +57,13 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        println(getAttrString(osp.spark.view.dsl.R.attr.state_fragment_full_class))
+        println(getThemeAttrValue(osp.spark.view.dsl.R.attr.state_fragment_full_class)?.string)
+        println(getAttrColor("colorOnPrimary".toAttrId(this)))
+        println(getAttrColor(com.google.android.material.R.attr.colorOnPrimary))
+        println(getThemeColor(com.google.android.material.R.attr.colorOnPrimary))
+        println(getThemeAttrValue(com.google.android.material.R.attr.colorOnPrimary)?.data)
+        println("${com.google.android.material.R.attr.colorOnPrimary} = ${"colorOnPrimary".toAttrId(this)}")
         val viewModel by viewModels<MediaSelectViewModel>()
         viewModel.registerForActivityResult(this::registerForActivityResult)
         EdgeToEdgeUtils.applyEdgeToEdge(window, true)

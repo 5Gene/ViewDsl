@@ -26,6 +26,10 @@ fun String.toResId(defType: String = "drawable", context: Context): Int {
     return context.resources.getIdentifier(this, defType, context.packageName)
 }
 
+fun String.toAttrId(context: Context): Int {
+    return toResId(defType = "attr", context)
+}
+
 fun Int.toDrawable(context: Context) = context.findDrawable(this)
 
 fun Context.findDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
