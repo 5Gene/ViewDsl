@@ -104,7 +104,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
      *  - 方法结束后UI页面状态会从加载中状态切换到加载成功状态显示业务具体
      *  - 方法返回null会显示空页面
      *  - 此方法内抛出UIStateException时会显示对应UI状态，不抛出UIStateException会显示默认错误页面
-     *      - 所有状态都定义在 **[DevicePageType]** 中
+     *      - 所有状态都定义在 **[UIState]** 中
      */
     abstract suspend fun doRequest(stateHandle: SavedStateHandle): D?
 
@@ -126,6 +126,11 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
 
     /**
      * UI操作后更新局部数据对应更新UI局部
+     * ```
+     * update {
+     *    copy(data = new_data)
+     * }
+     * ```
      */
     protected fun update(update: D.() -> D) {
         _uiState.update {
@@ -322,5 +327,4 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
      * - 比如：页面有底部按钮可以覆写此方法添加底部按钮到content
      */
     open fun FrameLayout.addViewToActivityContent(): View? = null
-
 }
