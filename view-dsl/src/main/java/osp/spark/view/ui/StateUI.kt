@@ -1,6 +1,5 @@
 package osp.spark.view.ui
 
-import android.R
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -183,7 +182,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
     /**
      * 箭头UI数据的局部更新
      */
-    fun focusOn(transform: D.() -> R?): LiveData<R> = uiState.mapNotNull {
+    fun <R> focusOn(transform: D.() -> R?): LiveData<R> = uiState.mapNotNull {
         (this as UIState.Success<D>).data!!.transform()
     }
 
@@ -218,12 +217,6 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
         )[actualType]
     }
 
-
-    /**
-     * 覆盖 setTitle 方法，根据 title 方法返回的资源 ID 设置活动标题。
-     * 如果资源 ID 为 0，则设置为空字符串。
-     * @param title CharSequence? 要设置的标题，在此重写中未使用。
-     */
     override fun setTitle(title: CharSequence?) {
         val titleRes = title()
         if (titleRes == 0) {
@@ -233,11 +226,6 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
         }
     }
 
-    /**
-     * 处理活动创建，初始化 UI 和观察者。
-     * 设置活动的主题、全屏模式和布局。
-     * 观察设备连接状态变化和加载状态以相应地更新 UI。
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(LinearLayout(this).apply {
@@ -274,14 +262,14 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
 
     private fun FrameLayout.onUiStateChange(state: UIState, showId: Int) {
         supportFragmentManager.commit(true) {
-            setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+            setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
             val fragmentShow = fragmentFromState(state)
             replace(showId, fragmentShow)
         }
 
         if (state is UIState.Success<*>) {
             if (subContentView == null) {
-                subContentView = findViewById<FrameLayout>(R.id.content).addViewToActivityContent()
+                subContentView = findViewById<FrameLayout>(android.R.id.content).addViewToActivityContent()
             }
             if (subContentView?.isVisible == false) {
                 subContentView!!.isVisible = true
@@ -299,18 +287,6 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    /**
-     * ## 作用：
-     *   #### 根据传入的不同state，显示不同的ui，ui通过fragment提供
-     *
-     * - UI层通过ViewModel提供的uiState来更新对应的UI状态(加载中，加载成功，加载失败)
-     * - 在BasicDeviceStateViewModel中的request()方法是请求数据的入口，默认uiState的状态是：加载中
-     * - 在BasicDeviceStateViewModel中控制UI显示什么state
-     *
-     * @param state DevicePageType 当前设备页面类型，表示连接状态。
-     * @return Fragment 基于设备连接状态要显示的片段。
-     *
-     */
     open fun fragmentFromState(state: UIState): Fragment {
         val fragmentShow = if (state is UIState.Success<*>) {
             showSuccessFragment(state.data as D).apply {
@@ -323,21 +299,19 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
     }
 
     /**
-     * 创建并返回一个带有指定标题和状态的状态片段。
-     * - 此方法主要显示loading和error的状态，根据不同的error显示不同的错误页面
-     *
-     * @param state UIState 要在片段中显示的设备页面类型。
-     * @return Fragment 一个初始化了给定标题和状态的 StateFragment 实例。
+     * @param state UIState 具体要显示的状态
+     * @return Fragment 具体显示的状态页面。
      */
     open fun showStateFragment(state: UIState): Fragment = StateFragment(state)
 
     /**
+     * #### 数据加载成功之后要显示的fragment
+     * - ***此方法在 [StateViewModel#doRequest()] 执行结束后执行***
      * - 子类必须实现，数据加载成功之后显示什么fragment
-     * - 由于Activity没有实现标题栏，所以fragment需要自己实现标题栏
      *  - 已有3类实现了标题栏的基类Fragment
-     *      - **BasicPreferenceFragment，卡片风格Fragment，比如设置页面**
-     *      - **BasicComposeToolbarFragment，使用compose绘制界面**
-     *      - **BasicViewToolbarFragment，使用view绘制界面，通过ViesDsl构建页面不需要xml布局**
+     *      - **PrefDslFragment，设置风格Fragment，通过PrefDsl构建页面不需要xml布局**
+     *      - **ComposeFragment，使用compose绘制界面**
+     *      - **ViewDslFragment，使用view绘制界面，通过ViesDsl构建页面不需要xml布局**
      *
      * @return Fragment 数据加载成功之后要显示的 fragment
      */
