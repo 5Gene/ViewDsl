@@ -3,42 +3,53 @@ package osp.spark.view.ui
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.Window
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import osp.spark.view.dsl.box
 import osp.spark.view.dsl.frameLayoutParams
 import osp.spark.view.dsl.toolBar
 import osp.spark.view.ui.UIState.Loading
 import osp.spark.view.wings.classChange
+import osp.spark.view.wings.findActualType
+import osp.spark.view.wings.focusOn
 import osp.spark.view.wings.log
 import osp.spark.view.wings.mapNotNull
-import java.lang.reflect.ParameterizedType
 import kotlin.concurrent.thread
 
 data class UIStateException(val code: Int, val msg: String) : Exception(msg, null, false, false)
 
-sealed interface UIState {
-    data class Loading(val tips: String) : UIState
-    data class Success<D>(val loadingDialog: Boolean = false, val data: D? = null) : UIState
-    data class Empty(val illustration: Int, val tips: String) : UIState
-    data class Error(val illustration: Int? = null, val tips: String? = null) : UIState
+sealed interface UIState<out D> {
+    data class Loading(val tips: String) : UIState<Nothing>
+    data class Success<D>(val loadingDialog: Boolean = false, val data: D) : UIState<D>
+    data class Empty(val illustration: Int, val tips: String) : UIState<Nothing>
+    data class Error(val illustration: Int? = null, val tips: String? = null) : UIState<Nothing>
 }
 
 interface UIEvent {
@@ -48,21 +59,18 @@ interface UIEvent {
 
 abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel() {
 
-    //内部使用不对UI开放，防止UI层修改, 默认加载中
     protected val _uiState = MutableLiveData(initialState())
-
-    //对UI层开放，UI层监听数据变化更新UI
-    val uiState: LiveData<UIState> = _uiState
+    val uiState: LiveData<UIState<D>> = _uiState
 
     //<editor-fold desc="UI事件">
     private val _uiEvent = MutableLiveData<UIEvent>()
     val uiEvent: LiveData<UIEvent> = _uiEvent.distinctUntilChanged()//去掉粘性
     //</editor-fold>
 
-    open fun initialState(): UIState = Loading("")
+    open fun initialState(): UIState<D> = Loading("")
 
     //扩展方法，更新MutableLiveData中数据的某项内容
-    protected fun MutableLiveData<UIState>.update(change: UIState.() -> UIState) {
+    protected fun MutableLiveData<UIState<D>>.update(change: UIState<D>.() -> UIState<D>) {
         postValue(value!!.change())
     }
 
@@ -87,11 +95,11 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
                 e.message?.log("request")
                 when (e) {
                     is UIStateException -> {
-                        showError(0, "")
+                        showError(0, e.msg)
                     }
 
                     else -> {
-                        showError(0, "")
+                        showError(0, e.message ?: "")
                     }
                 }
             }
@@ -109,7 +117,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
     abstract suspend fun doRequest(stateHandle: SavedStateHandle): D?
 
     fun showLoading() {
-        _uiState.postValue(UIState.Loading(""))
+        _uiState.postValue(Loading(""))
     }
 
     protected fun showSucceed(data: D) {
@@ -134,8 +142,8 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
      */
     protected fun update(update: D.() -> D) {
         _uiState.update {
-            if (this is UIState.Success<*>) {
-                UIState.Success(data = update(data!! as D))
+            if (this is UIState.Success<D>) {
+                UIState.Success(data = update(data))
             } else {
                 throw IllegalStateException("must be invoke in success state")
             }
@@ -145,7 +153,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
 
     private fun showLoadingDialog() {
         _uiState.update {
-            if (this is UIState.Success<*>) {
+            if (this is UIState.Success<D>) {
                 copy(loadingDialog = true)
             } else {
                 throw IllegalStateException("must be invoke in success state")
@@ -154,7 +162,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
     }
 
     private fun finishLoadingDialog() = _uiState.update {
-        if (this is UIState.Success<*>) {
+        if (this is UIState.Success<D>) {
             copy(loadingDialog = false)
         } else {
             throw IllegalStateException("must be invoke in success state")
@@ -188,7 +196,7 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
      * 箭头UI数据的局部更新
      */
     fun <R> focusOn(transform: D.() -> R?): LiveData<R> = uiState.mapNotNull {
-        (this as UIState.Success<D>).data!!.transform()
+        (it as UIState.Success<D>).data.transform()
     }
 
     override fun onCleared() {
@@ -212,14 +220,24 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
      * 此 ViewModel必须是 StateViewModel的子类
      */
     val vm: VM by lazy {
-        val clazz = StateActivity::class.java
-        val superClass = clazz.genericSuperclass
-        val actualType = (superClass as ParameterizedType).actualTypeArguments[1] as Class<VM>
+//        val clazz = StateActivity::class.java
+//        val superClass = clazz.genericSuperclass
+//        val actualType = (superClass as ParameterizedType).actualTypeArguments[1] as Class<VM>
+//        ViewModelProvider(
+//            viewModelStore,
+//            defaultViewModelProviderFactory,
+//            defaultViewModelCreationExtras
+//        )[actualType]
+        val vmClass = this@StateActivity.findActualType<VM>(1)
         ViewModelProvider(
             viewModelStore,
             defaultViewModelProviderFactory,
             defaultViewModelCreationExtras
-        )[actualType]
+        )[vmClass]
+    }
+
+    protected val insetsController: WindowInsetsControllerCompat by lazy {
+        WindowCompat.getInsetsController(window, window.decorView)
     }
 
     override fun setTitle(title: CharSequence?) {
@@ -232,10 +250,29 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+//      https://developer.android.google.cn/develop/ui/views/layout/edge-to-edge?hl=zh-cn
+//      默认情况下，enableEdgeToEdge 会将系统栏设为透明，但在“三按钮”导航模式下，状态栏会显示半透明纱罩。系统图标和纱罩的颜色会根据系统浅色或深色主题来调整。
+//      enableEdgeToEdge 方法会自动声明应用应全屏布局，并调整系统栏的颜色。
+        enableEdgeToEdge()
+//      https://developer.android.google.cn/jetpack/compose/layouts/insets?hl=zh-cn
+        window.requestFeature(Window.FEATURE_CONTENT_TRANSITIONS)
         super.onCreate(savedInstanceState)
+        //全屏 显示到status bar下面 在系统栏后布置您的应用 设置doctorView不要填充statusbar
+        // 设置内容扩展到状态栏
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        window.decorView.systemUiVisibility = (
+//                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                )
+
+        // 设置状态栏颜色为透明
+        insetsController.isAppearanceLightStatusBars = true
+        window.statusBarColor = 0x00000000
+
         setContentView(LinearLayout(this).apply {
             val showId = View.generateViewId()
             toolBar {
+//            fitsSystemWindows = true
                 setSupportActionBar(this)
             }
             box(id = showId) {
@@ -247,14 +284,15 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
             }
             frameLayoutParams(-1, -1)
         })
-        val activityContent = findViewById<FrameLayout>(android.R.id.content)
-        ViewCompat.setOnApplyWindowInsetsListener(activityContent) { v: View, insets: WindowInsetsCompat ->
-            v.updatePadding(bottom = insets.systemWindowInsetBottom)
-            insets.consumeSystemWindowInsets()
-        }
-
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // 可选，即使在使用 DrawerLayout 时也显示返回箭头
         supportActionBar?.setHomeButtonEnabled(true)    // 可选，启用返回按钮的点击
+
+        val activityContent = findViewById<FrameLayout>(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(activityContent) { v: View, insets: WindowInsetsCompat ->
+//            v.updatePadding(bottom = insets.systemWindowInsetBottom)
+            v.updatePadding(bottom = WindowInsetsCompat.Type.navigationBars())
+            WindowInsetsCompat.CONSUMED
+        }
 
 //        vm.loadingState.observe(this) {
 //            if (it) {
@@ -265,7 +303,7 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
 //        }
     }
 
-    private fun FrameLayout.onUiStateChange(state: UIState, showId: Int) {
+    private fun FrameLayout.onUiStateChange(state: UIState<D>, showId: Int) {
         supportFragmentManager.commit(true) {
             setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
             val fragmentShow = fragmentFromState(state)
@@ -292,9 +330,9 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    open fun fragmentFromState(state: UIState): Fragment {
-        val fragmentShow = if (state is UIState.Success<*>) {
-            showSuccessFragment(state.data as D).apply {
+    open fun fragmentFromState(state: UIState<D>): Fragment {
+        val fragmentShow = if (state is UIState.Success<D>) {
+            showSuccessFragment(state.data).apply {
                 arguments = bundleOf("title" to title())
             }
         } else {
@@ -307,7 +345,7 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
      * @param state UIState 具体要显示的状态
      * @return Fragment 具体显示的状态页面。
      */
-    open fun showStateFragment(state: UIState): Fragment = StateFragment(state)
+    open fun showStateFragment(state: UIState<D>): Fragment = StateFragment(state)
 
     /**
      * #### 数据加载成功之后要显示的fragment
@@ -327,4 +365,21 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
      * - 比如：页面有底部按钮可以覆写此方法添加底部按钮到content
      */
     open fun FrameLayout.addViewToActivityContent(): View? = null
+
+
+    @Suppress("UNCHECKED_CAST")
+    fun <R, T> LiveData<T>.observeOn(
+        transform: (T) -> R = { this as R },
+        observer: Observer<R>
+    ) {
+        focusOn(transform).observe(this@StateActivity, observer)
+    }
+
+    fun <R, T> Flow<T>.collectOn(transform: (T) -> R, collector: FlowCollector<R>) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                focusOn(transform).collect(collector)
+            }
+        }
+    }
 }

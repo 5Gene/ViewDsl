@@ -8,9 +8,13 @@ import java.lang.reflect.Proxy
 inline fun <reified T> Any?.safeAs(): T? = this as? T
 
 fun <T> Any.firstActualType(): Class<T> {
+    return findActualType(0)
+}
+
+fun <T> Any.findActualType(index: Int): Class<T> {
     val clazz = this::class.java
     val superClass = clazz.genericSuperclass
-    return (superClass as ParameterizedType).actualTypeArguments.first() as Class<T>
+    return (superClass as ParameterizedType).actualTypeArguments[index] as Class<T>
 }
 
 internal inline fun <reified T : Any> noOpDelegate(): T {

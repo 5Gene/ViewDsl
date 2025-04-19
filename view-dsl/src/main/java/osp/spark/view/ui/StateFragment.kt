@@ -1,5 +1,6 @@
 package osp.spark.view.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -9,12 +10,37 @@ import android.widget.LinearLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.launch
 import osp.spark.view.dsl.preference.screen
 import osp.spark.view.dsl.text
 
-abstract class ViewDslFragment<D>(val data: D) : Fragment() {
+open class GodFragment(contentLayoutId: Int = 0) : Fragment(contentLayoutId) {
+
+    fun <T> LiveData<T>.observer(observer: Observer<T>) {
+        observe(viewLifecycleOwner, observer)
+    }
+
+    fun <T> Flow<T>.observer(collector: FlowCollector<T>) {
+        viewLifecycleOwner.apply {
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    collect(collector)
+                }
+            }
+        }
+    }
+}
+
+abstract class ViewDslFragment<D>(val data: D) : GodFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return LinearLayout(inflater.context).apply { onShowContent(data) }
@@ -25,6 +51,14 @@ abstract class ViewDslFragment<D>(val data: D) : Fragment() {
 
 abstract class PrefDslFragment<D>(val data: D) : PreferenceFragmentCompat() {
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         screen {
             onShowContent(data)
@@ -34,7 +68,7 @@ abstract class PrefDslFragment<D>(val data: D) : PreferenceFragmentCompat() {
     abstract fun PreferenceScreen.onShowContent(data: D)
 }
 
-abstract class ComposeFragment<D>(val data: D) : Fragment() {
+abstract class ComposeFragment<D>(val data: D) : GodFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return ComposeView(inflater.context).apply {
@@ -48,8 +82,8 @@ abstract class ComposeFragment<D>(val data: D) : Fragment() {
     abstract fun ShowContent(data: D)
 }
 
-class StateFragment(state: UIState) : ViewDslFragment<UIState>(state) {
-    override fun LinearLayout.onShowContent(data: UIState) {
+class StateFragment(state: UIState<*>) : ViewDslFragment<UIState<*>>(state) {
+    override fun LinearLayout.onShowContent(data: UIState<*>) {
         if (data is UIState.Loading) {
             val tips = data.tips
 
