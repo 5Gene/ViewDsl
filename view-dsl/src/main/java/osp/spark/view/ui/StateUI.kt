@@ -38,12 +38,13 @@ import osp.spark.view.dsl.toolBar
 import osp.spark.view.ui.UIState.Loading
 import osp.spark.view.wings.classChange
 import osp.spark.view.wings.findActualType
-import osp.spark.view.wings.focusOn
 import osp.spark.view.wings.log
 import osp.spark.view.wings.mapNotNull
 import kotlin.concurrent.thread
 
-data class UIStateException(val code: Int, val msg: String) : Exception(msg, null, false, false)
+private const val STATE_EMPTY = -110
+
+data class UIStateException(val code: Int, val illustration: Int, val msg: String) : Exception(msg, null, false, false)
 
 sealed interface UIState<out D> {
     data class Loading(val tips: String) : UIState<Nothing>
@@ -69,11 +70,6 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
 
     open fun initialState(): UIState<D> = Loading("")
 
-    //扩展方法，更新MutableLiveData中数据的某项内容
-    protected fun MutableLiveData<UIState<D>>.update(change: UIState<D>.() -> UIState<D>) {
-        postValue(value!!.change())
-    }
-
     /**
      * 初始数据入口，请求数据入口，控制UI显示状态
      */
@@ -95,7 +91,11 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
                 e.message?.log("request")
                 when (e) {
                     is UIStateException -> {
-                        showError(0, e.msg)
+                        if (e.code == STATE_EMPTY) {
+                            showError(e.illustration, e.msg)
+                        } else {
+                            showEmpty(e.illustration, e.msg)
+                        }
                     }
 
                     else -> {
@@ -124,8 +124,16 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
         _uiState.postValue(UIState.Success(data = data))
     }
 
+    protected fun emptyStateException(illustration: Int, tips: String) {
+        throw UIStateException(STATE_EMPTY, illustration, tips)
+    }
+
     protected fun showEmpty(illustration: Int, tips: String) {
         _uiState.postValue(UIState.Empty(illustration, tips))
+    }
+
+    protected fun errorStateException(illustration: Int, tips: String) {
+        throw UIStateException(0, illustration, tips)
     }
 
     protected fun showError(illustration: Int, tips: String) {
@@ -135,21 +143,26 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
     /**
      * UI操作后更新局部数据对应更新UI局部
      * ```
-     * update {
+     * successChange {
      *    copy(data = new_data)
      * }
      * ```
      */
-    protected fun update(update: D.() -> D) {
+    protected fun successChange(change: D.() -> D) {
         _uiState.update {
             if (this is UIState.Success<D>) {
-                UIState.Success(data = update(data))
+                UIState.Success(data = change(data))
             } else {
                 throw IllegalStateException("must be invoke in success state")
             }
         }
     }
 
+    protected fun successUpdate(update: (D) -> Unit) {
+        successChange {
+            apply(update)
+        }
+    }
 
     private fun showLoadingDialog() {
         _uiState.update {
@@ -195,8 +208,13 @@ abstract class StateViewModel<D>(val stateHandle: SavedStateHandle) : ViewModel(
     /**
      * 箭头UI数据的局部更新
      */
-    fun <R> focusOn(transform: D.() -> R?): LiveData<R> = uiState.mapNotNull {
-        (it as UIState.Success<D>).data.transform()
+    fun <R> focusOn(transform: (D) -> R?): LiveData<R> = uiState.mapNotNull {
+        transform((it as UIState.Success<D>).data)
+    }
+
+    //扩展方法，更新MutableLiveData中数据的某项内容
+    protected fun MutableLiveData<UIState<D>>.update(change: UIState<D>.() -> UIState<D>) {
+        postValue(value!!.change())
     }
 
     override fun onCleared() {
@@ -366,20 +384,31 @@ abstract class StateActivity<D, VM : StateViewModel<D>> : AppCompatActivity() {
      */
     open fun FrameLayout.addViewToActivityContent(): View? = null
 
-
-    @Suppress("UNCHECKED_CAST")
-    fun <R, T> LiveData<T>.observeOn(
-        transform: (T) -> R = { this as R },
-        observer: Observer<R>
-    ) {
-        focusOn(transform).observe(this@StateActivity, observer)
+    fun <T> LiveData<T>.observe(observer: Observer<T>) {
+        observe(this@StateActivity, observer)
     }
 
-    fun <R, T> Flow<T>.collectOn(transform: (T) -> R, collector: FlowCollector<R>) {
+    fun <T> Flow<T>.collect(collector: FlowCollector<T>) {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                focusOn(transform).collect(collector)
+                collect(collector)
             }
         }
+    }
+}
+
+class NoStatViewModel(stateHandle: SavedStateHandle) : StateViewModel<Nothing>(stateHandle) {
+    override suspend fun doRequest(stateHandle: SavedStateHandle): Nothing? {
+        return null
+    }
+}
+
+class NoStateActivity : StateActivity<Nothing, NoStatViewModel>() {
+    override fun title(): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun showSuccessFragment(data: Nothing): Fragment {
+        TODO("Not yet implemented")
     }
 }

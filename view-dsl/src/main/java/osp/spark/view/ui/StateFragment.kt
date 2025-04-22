@@ -15,41 +15,38 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
+import androidx.preference.TwoStatePreference
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import osp.spark.view.dsl.preference.screen
 import osp.spark.view.dsl.text
+import osp.spark.view.wings.safeAs
+
 
 open class GodFragment(contentLayoutId: Int = 0) : Fragment(contentLayoutId) {
 
-    fun <T> LiveData<T>.observer(observer: Observer<T>) {
+    fun <T> LiveData<T>.observe(observer: Observer<T>) {
         observe(viewLifecycleOwner, observer)
     }
 
-    fun <T> Flow<T>.observer(collector: FlowCollector<T>) {
-        viewLifecycleOwner.apply {
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    collect(collector)
-                }
+    fun <T> Flow<T>.collect(collector: FlowCollector<T>) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collect(collector)
             }
         }
     }
 }
 
-abstract class ViewDslFragment<D>(val data: D) : GodFragment() {
+abstract class PrefDslFragment<D, VM : StateViewModel<D>>(val data: D) : PreferenceFragmentCompat() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return LinearLayout(inflater.context).apply { onShowContent(data) }
+    val vm: VM by lazy {
+        requireActivity().safeAs<StateActivity<D, VM>>()!!.vm
     }
-
-    abstract fun LinearLayout.onShowContent(data: D)
-}
-
-abstract class PrefDslFragment<D>(val data: D) : PreferenceFragmentCompat() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -66,6 +63,29 @@ abstract class PrefDslFragment<D>(val data: D) : PreferenceFragmentCompat() {
     }
 
     abstract fun PreferenceScreen.onShowContent(data: D)
+
+    fun TwoStatePreference.checkedOn(transform: (D) -> Boolean?) {
+        val focusOn = vm.focusOn(transform)
+        focusOn.observe(viewLifecycleOwner) {
+            isChecked = it
+        }
+    }
+
+    fun Preference.visibleOn(transform: (D) -> Boolean?) {
+        val focusOn = vm.focusOn(transform)
+        focusOn.observe(viewLifecycleOwner) {
+            isVisible = it
+        }
+    }
+}
+
+abstract class ViewDslFragment<D>(val data: D) : GodFragment() {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return LinearLayout(inflater.context).apply { onShowContent(data) }
+    }
+
+    abstract fun LinearLayout.onShowContent(data: D)
 }
 
 abstract class ComposeFragment<D>(val data: D) : GodFragment() {

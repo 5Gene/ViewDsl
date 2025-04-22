@@ -29,7 +29,7 @@ inline fun <R, T> LiveData<T>.focusOn(
 //        val curr = it.transform()
         val curr = transform(it)
         if (pre != curr) {
-            outerLiveData.value = curr!!
+            outerLiveData.value = curr
         }
     }
     return outerLiveData
@@ -68,7 +68,7 @@ fun <T> LiveData<T>.classChange(): LiveData<T> {
     return outerLiveData
 }
 
-fun <R, T> LiveData<T>.observeOn(
+fun <R, T> LiveData<T>.focusOn(
     owner: LifecycleOwner,
     transform: (T) -> R,
     observer: Observer<R?>
@@ -77,7 +77,7 @@ fun <R, T> LiveData<T>.observeOn(
 }
 
 @Suppress("UNCHECKED_CAST")
-inline fun <R, T> LiveData<T>.observeOn(
+inline fun <R, T> LiveData<T>.focusOn(
     view: View,
     crossinline transform: (T) -> R = { this as R },
     observer: Observer<R>
@@ -110,7 +110,7 @@ fun <R, T> LiveData<T>.property(
     return outerLiveData
 }
 
-fun <R, T> LiveData<T>.observeProp(
+fun <R, T> LiveData<T>.focusProp(
     owner: LifecycleOwner,
     property: KProperty1<T, R>,
     observer: Observer<R?>
@@ -118,7 +118,7 @@ fun <R, T> LiveData<T>.observeProp(
     property(property).observe(owner, observer)
 }
 
-fun <R, T> LiveData<T>.observeProp(
+fun <R, T> LiveData<T>.focusProp(
     view: View,
     property: KProperty1<T, R>,
     observer: Observer<R?>
@@ -146,7 +146,7 @@ inline fun <R, T> Flow<T>.focusOn(
     return this.map { transform(it) }.distinctUntilChanged()
 }
 
-inline fun <R, T> Flow<T>.collectOn(
+inline fun <R, T> Flow<T>.focusOn(
     view: View,
     crossinline transform: (T) -> R,
     collector: FlowCollector<R>
@@ -154,10 +154,10 @@ inline fun <R, T> Flow<T>.collectOn(
     (view.findViewTreeLifecycleOwner() ?: view.context.safeAs<ComponentActivity>())?.apply {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                this@collectOn.focusOn(transform).collect(collector)
+                this@focusOn.focusOn(transform).collect(collector)
             }
         }
     } ?: CoroutineScope(Dispatchers.IO).launch {
-        this@collectOn.focusOn(transform).collect(collector)
+        this@focusOn.focusOn(transform).collect(collector)
     }
 }
