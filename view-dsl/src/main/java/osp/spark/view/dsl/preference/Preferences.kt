@@ -4,8 +4,10 @@ package osp.spark.view.dsl.preference
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.core.view.isNotEmpty
 import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -22,6 +24,7 @@ import androidx.preference.SwitchPreferenceCompat
 import osp.spark.view.dsl.R
 import osp.spark.view.dsl.ViewDslScope
 import osp.spark.view.wings.isNotNullOrEmpty
+import osp.spark.view.wings.safeAs
 
 //https://developer.android.google.cn/develop/ui/views/components/settings?hl=zh-cn
 
@@ -114,18 +117,18 @@ fun PreferenceScreen.category(title: Any? = null, content: (@ViewDslScope Prefer
     addPreference(key = "", title = title, preference = PreferenceCategory(context, null), content = content)
 }
 
-fun PreferenceGroup.linearLayout(once: Boolean = true, content: (@ViewDslScope LinearLayout.() -> Unit)? = null) {
-    layout(R.layout.preference_layout_dsl, once, content)
+fun PreferenceGroup.layout(dsl: Boolean = true, content: (@ViewDslScope LinearLayout.() -> Unit)? = null) {
+    layout(R.layout.preference_layout_dsl, dsl, content)
 }
 
 /**
  * PreferenceCategory和PreferenceScreen都可引用
  */
-fun <T> PreferenceGroup.layout(layout: Int, once: Boolean = true, content: (@ViewDslScope T.() -> Unit)? = null) {
+fun <T> PreferenceGroup.layout(layout: Int, dsl: Boolean = true, content: (@ViewDslScope T.() -> Unit)? = null) {
     addPreference(LayoutPreference<T>(context).apply {
         layoutResource = layout
         this.content = content
-        this.once = once
+        this.isDslView = dsl
     })
 }
 
@@ -138,13 +141,17 @@ fun PreferenceGroup.layout(layout: Int, content: (@ViewDslScope Preference.() ->
 
 private class LayoutPreference<T>(context: Context) : Preference(context) {
     var content: (T.() -> Unit)? = {}
-    var once = true
+    var isDslView = true
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
-        content?.invoke((holder.itemView as T))
-        if (once) {
-            content = null
+        if (isDslView) {
+            holder.itemView.safeAs<ViewGroup>()!!.let {
+                if (it.isNotEmpty()) {
+                    it.removeAllViews()
+                }
+            }
         }
+        content?.invoke((holder.itemView as T))
     }
 }
 

@@ -77,6 +77,13 @@ abstract class PrefDslFragment<D, VM : StateViewModel<D>>(val data: D) : Prefere
             isVisible = it
         }
     }
+
+    fun Preference.enabledOn(transform: (D) -> Boolean?) {
+        val focusOn = vm.focusOn(transform)
+        focusOn.observe(viewLifecycleOwner) {
+            isEnabled = it
+        }
+    }
 }
 
 abstract class ViewDslFragment<D>(val data: D) : GodFragment() {
