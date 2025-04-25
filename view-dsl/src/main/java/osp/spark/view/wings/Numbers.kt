@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.util.TypedValue
 import androidx.appcompat.content.res.AppCompatResources
+import osp.spark.view.wings.God.sTopActivity
 import java.util.concurrent.TimeUnit
 
 fun Int.vector2Bitmap(context: Context, block: ((Canvas) -> Unit)? = null): Bitmap {

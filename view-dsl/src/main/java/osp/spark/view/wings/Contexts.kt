@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Context.KEYGUARD_SERVICE
-import android.content.res.Resources
-import android.graphics.Rect
 import android.os.PowerManager
-import android.util.DisplayMetrics
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
@@ -96,17 +93,6 @@ fun Context.wakeUpAndUnlock() {
     keyguardLock.disableKeyguard() // 解锁
 }
 
-
-val screenMetrics: DisplayMetrics by lazy {
-    val resources: Resources = Resources.getSystem()
-    resources.displayMetrics
-}
-
-val screen: Rect by lazy {
-    val screenWidth = screenMetrics.widthPixels
-    val screenHeight = screenMetrics.heightPixels
-    Rect(0, 0, screenWidth, screenHeight)
-}
 
 
 //注释语法

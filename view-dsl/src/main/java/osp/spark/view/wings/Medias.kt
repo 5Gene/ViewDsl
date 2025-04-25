@@ -11,6 +11,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Size
+import osp.spark.view.wings.God.godContext
 import java.io.File
 
 //照片选择
