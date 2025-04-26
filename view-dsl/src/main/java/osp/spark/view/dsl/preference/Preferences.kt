@@ -4,6 +4,7 @@ package osp.spark.view.dsl.preference
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -21,6 +22,7 @@ import androidx.preference.PreferenceViewHolder
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import androidx.preference.SwitchPreferenceCompat
+import androidx.preference.TwoStatePreference
 import osp.spark.view.dsl.R
 import osp.spark.view.dsl.ViewDslScope
 import osp.spark.view.wings.isNotNullOrEmpty
@@ -73,7 +75,7 @@ fun <T : Preference> PreferenceGroup.addPreference(
 ) {
     addPreference(preference.apply {
         setKey(key)
-        isPersistent = !key.isNotNullOrEmpty()
+        isPersistent = key.isNotNullOrEmpty()
         iconRes?.let {
             setIcon(it)
         }
@@ -144,7 +146,7 @@ private class LayoutPreference<T>(context: Context) : Preference(context) {
     var isDslView = true
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
-        if (isDslView) {
+        if (isDslView && holder.itemView.id == View.NO_ID) {
             holder.itemView.safeAs<ViewGroup>()!!.let {
                 if (it.isNotEmpty()) {
                     it.removeAllViews()
@@ -155,7 +157,6 @@ private class LayoutPreference<T>(context: Context) : Preference(context) {
     }
 }
 
-
 //直接调用构造函数：几乎没有额外的开销，非常高效。
 //反射调用构造函数：有显著的开销，特别是当需要频繁调用时，性能差异会变得更加明显。
 //通过反射调用构造函数, 这种方式使用反射来查找和调用构造函数。反射的开销主要在于：
@@ -163,7 +164,7 @@ private class LayoutPreference<T>(context: Context) : Preference(context) {
 // - 调用构造函数：通过反射调用构造函数 (newInstance) 也是较慢的操作，因为它涉及更多的底层操作和安全检查。
 @Deprecated("直接调用构造函数：几乎没有额外的开销，非常高效。\n反射调用构造函数：有显著的开销，特别是当需要频繁调用时，性能差异会变得更加明显。")
 inline fun <reified T : Preference> PreferenceGroup.addPreference(
-    key: String,
+    key: String = "",
     title: Any? = null,
     summary: Any? = null,
     iconRes: Int? = null,
@@ -172,7 +173,6 @@ inline fun <reified T : Preference> PreferenceGroup.addPreference(
     val preference = T::class.java.getConstructor(Context::class.java, AttributeSet::class.java).newInstance(context, null)
     addPreference(key, title, summary, iconRes, preference, content)
 }
-
 
 /**
  * ## 自定义switchCompat样式
@@ -187,7 +187,7 @@ inline fun <reified T : Preference> PreferenceGroup.addPreference(
  * ```
  */
 fun PreferenceGroup.switch(
-    key: String,
+    key: String = "",
     title: Any? = null,
     summary: Any? = null,
     iconRes: Int? = null,
@@ -205,7 +205,7 @@ fun PreferenceGroup.switch(
  * ```
  */
 fun PreferenceGroup.switchCompat(
-    key: String,
+    key: String = "",
     title: Any? = null,
     summary: Any? = null,
     iconRes: Int? = null,
@@ -216,7 +216,7 @@ fun PreferenceGroup.switchCompat(
 
 
 fun PreferenceGroup.seekBar(
-    key: String,
+    key: String = "",
     title: Any? = null,
     summary: Any? = null,
     iconRes: Int? = null,
@@ -226,7 +226,7 @@ fun PreferenceGroup.seekBar(
 }
 
 fun PreferenceGroup.checkBox(
-    key: String,
+    key: String = "",
     title: Any? = null,
     summary: Any? = null,
     iconRes: Int? = null,
@@ -256,7 +256,7 @@ fun PreferenceGroup.multiSelect(
 }
 
 fun PreferenceGroup.editText(
-    key: String,
+    key: String = "",
     title: Any? = null,
     summary: Any? = null,
     iconRes: Int? = null,
@@ -266,13 +266,26 @@ fun PreferenceGroup.editText(
 }
 
 fun PreferenceGroup.seekbar(
-    key: String,
+    key: String = "",
     title: Any? = null,
     summary: Any? = null,
     iconRes: Int? = null,
     content: @ViewDslScope (SeekBarPreference.() -> Unit)? = null
 ) {
     addPreference(key, title, summary, iconRes, SeekBarPreference(context, null), content)
+}
+
+fun TwoStatePreference.onChange(change: (Any) -> Unit) {
+    var lastValue: Any? = null
+    var lastChangeTime: Long = 0
+    setOnPreferenceChangeListener { _, value ->
+        if (lastValue != value && System.currentTimeMillis() - lastChangeTime > 400) {
+            lastValue = value
+            lastChangeTime = System.currentTimeMillis()
+            change(value)
+        }
+        true
+    }
 }
 
 fun Preference.onClick(click: () -> Unit) {
@@ -283,7 +296,7 @@ fun Preference.onClick(click: () -> Unit) {
 }
 
 interface PrefWidget {
-    fun PreferenceGroup.content()
+    fun PreferenceCategory.content()
 }
 
 class PrefCategory(val title: String? = null, val widgets: List<PrefWidget>)
@@ -304,7 +317,6 @@ fun PreferenceFragmentCompat.buildScreen(categories: List<PrefCategory>) {
         }
     }
 }
-
 
 private class UrlPreference(context: Context) : Preference(context) {
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
