@@ -34,6 +34,7 @@ import osp.spark.view.auxiliary.LayoutConstraint
 import osp.spark.view.wings.alpha
 import osp.spark.view.wings.checkId
 import osp.spark.view.wings.dpf
+import java.security.MessageDigest
 
 //限制使用最近的receiver
 //对于有receiver的方法(A.()->Unit),限定作用域只在此方法内,方法内部的方法无法访问
@@ -465,3 +466,17 @@ fun View.shapeRound(radius: Number = 1F, shadowColor: Int? = null, bgColor: Int?
 //EXACTLY、AT_MOST 和 UNSPECIFIED 则是系统用来传达具体布局约束的方式。
 
 
+fun String.toIdByMd5(): Int {
+    val md5 = MessageDigest.getInstance("MD5")
+    val digest = md5.digest(toByteArray())
+    // 取前4字节转成int，保证一致性
+    return ((digest[0].toInt() and 0xFF) shl 24) or
+            ((digest[1].toInt() and 0xFF) shl 16) or
+            ((digest[2].toInt() and 0xFF) shl 8) or
+            (digest[3].toInt() and 0xFF)
+}
+
+fun String.toId(): Int {
+    // 保证是正数（避免负ID）
+    return hashCode() and 0x00FFFFFF
+}
