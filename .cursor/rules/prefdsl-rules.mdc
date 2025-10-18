@@ -1,0 +1,288 @@
+---
+description: PreferenceDSL截图识别和代码生成规则
+alwaysApply: false
+---
+
+# PreferenceDSL 截图识别规则
+
+**使用：** 上传截图 + `@prefdsl-rules`
+
+## ⚠️ 重要：生成前必须确认
+
+**在生成任何代码之前，必须严格按照以下检查清单逐项确认：**
+
+### 检查清单（每次都要执行）
+
+1. ✅ **模式判断**：确认是完整模式（有标题）还是片段模式（无标题）
+2. ✅ **组件识别**：按第1步视觉特征 → 第2步描述内容的顺序识别
+3. ✅ **箭头识别**：看到箭头">"必须看第二行描述，不能直接用jump
+4. ✅ **ViewModel方法**：只写方法签名+默认返回值+简洁TODO，不写实现
+5. ✅ **字符串资源**：完整模式用R.string，片段模式用字面量
+6. ✅ **文件生成**：完整模式生成文件，片段模式只返回代码
+7. ✅ **不生成文档**：只生成代码文件，不生成README或说明文档
+
+**如果发现任何不符合规则的地方，立即纠正后再输出代码。**
+
+## 生成模式
+
+| 截图特征 | 生成内容 | 文字处理 |
+|---------|---------|---------|
+| 有标题+返回箭头 | UI + ViewModel + strings.xml | 使用R.string资源 |
+| 无标题栏 | 代码片段（不写入文件） | 字符串字面量 |
+
+## 组件识别规则（重要！非常重要！！严格按顺序判断）
+
+### 第1步：视觉特征初筛，严格按视觉特征做判断
+
+| 视觉特征 | 初步判断 | 下一步 |
+|---------|---------|--------|
+| 一定存在标题，且右侧没任何操作标示的 | text | 确定 |
+| 一定存在标题，右侧圆形滑块开关,同时开关左边有竖直分隔线 | switchWithDivider | ✅ 确定 |
+| 一定存在标题，右侧圆形滑块开关 | switchLoading | ✅ 确定 |
+| 一定存在标题，右侧方形复选框 | checkBox | ✅ 确定 |
+| 一定存在标题，右侧圆形勾选标记,同时圆形勾选标记左边有竖直分隔线 | markWithDivider | ✅ 确定 |
+| 一定存在标题，右侧圆形勾选标记 | mark | ✅ 确定 |
+| 一定存在标题，右侧箭头 ">" | ⚠️ 待定 | ⬇️ 进入第2步 |
+| 上述都不是，识别不出来 | layoutDsl | ✅ 确定 |
+
+### 第2步：第二行描述内容判断（右侧有箭头时必须执行）
+
+**当右侧有箭头">"时，必须根据第二行描述内容决定最终组件：**
+
+| 第二行格式 | 示例 | 最终组件 |
+|-----------|------|---------|
+| 数字 + 空格 + 单位 | "10000 步"、"8 小时" | `valuePicker` ✅ |
+| 年月日时间 | "2024年1月1日" | `datePicker` ✅ |
+| 日时分时间 | "1日 10:30" | `timePicker` ✅ |
+| 时:分格式 | "22:30" | `timeLimitPicker` ✅ |
+| 单个词语（≤4字符） | "震动"、"中等强度" | `singleSelect` ✅ |
+| 长文字（>4字符） | "长时间久坐时提醒您活动" | `jump` ✅ |
+| 无描述 | - | `jump` ✅ |
+
+**关键原则：**
+- ❌ **不能**看到箭头就用jump
+- ✅ **必须**先看第二行描述内容
+- ✅ 箭头只是说明可点击，具体组件由描述内容决定
+
+**识别口诀：**
+1. 看开关/复选框 → 直接确定组件
+2. 看箭头 → 看第二行描述
+3. 看描述格式 → 时间/数值选择器 or jump
+
+## 完整模式（有标题）
+
+### 生成3个文件
+
+**1. xxxUI.kt**
+```kotlin
+package com.heytap.health.settings.watch.sporthealthsettings2.ui
+
+import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceScreen
+import com.heytap.health.device_settings.impl.R
+import com.heytap.sporthealth.blib.basic.ui.BasicPreferenceFragment
+import com.heytap.sporthealth.blib.basic.ui.BasicStateActivity
+import kotlinx.coroutines.launch
+
+class XxxActivity : BasicStateActivity<XxxViewModel>() {
+    override fun title() = R.string.settings_xxx
+    override fun showSuccessFragment() = XxxFragment()
+}
+
+class XxxFragment : BasicPreferenceFragment<XxxViewModel>() {
+    override fun PreferenceScreen.showScreen() {
+        val data = vm.successData()
+        category {
+            setTitle(R.string.settings_xxx_category)
+            switchLoading {
+                setTitle(R.string.settings_xxx_item)
+                checkStateBy<XxxData> { field }
+                onClickSuspend { vm.changeXxx(it) }
+            }
+        }
+    }
+}
+```
+
+**2. xxxViewModel.kt**
+```kotlin
+package com.heytap.health.settings.watch.sporthealthsettings2.ui
+
+import androidx.lifecycle.SavedStateHandle
+import com.heytap.sporthealth.blib.basic.viewmodel.SHSettingBaseViewModel
+
+data class XxxData(
+    val enable: Boolean,
+    val value: Int
+)
+
+class XxxViewModel(stateHandle: SavedStateHandle) 
+    : SHSettingBaseViewModel<XxxData>(stateHandle) {
+    
+    override suspend fun loadData(stateHandle: SavedStateHandle): XxxData {
+        return XxxData(enable = false, value = 0)
+    }
+    
+    suspend fun changeXxx(newValue: Boolean): Boolean {
+        // TODO: 实现修改逻辑
+            return false
+    }
+}
+```
+
+**ViewModel方法规范(严格按照规范来)：**
+- 只定义方法签名，不写实现
+- 有返回值给默认值
+- 只保留简洁TODO注释
+
+**3. strings.xml（追加到现有文件）**
+
+`values/strings.xml` 在`</resources>`前追加：
+```xml
+    <!-- {功能名称} -->
+    <string name="settings_xxx">{English}</string>
+```
+
+`values-zh-rCN/strings.xml` 在`</resources>`前追加：
+```xml
+    <!-- {功能名称} -->
+    <string name="settings_xxx">{截图文本}</string>
+```
+
+### 命名规则
+从标题提取核心名称（简洁），生成：
+- `XxxActivity` / `XxxFragment` / `XxxViewModel` / `XxxData`
+- 资源ID：`R.string.settings_xxx`
+
+## 片段模式（无标题）
+
+只返回代码片段，不写入文件，直接用字符串字面量：
+
+```kotlin
+    category {
+    setTitle("运动健康")
+        
+        switchLoading {
+        title = "全天心率监测"
+            checkStateBy<SettingData> { heartRateEnable }
+        onClickSuspend { vm.changeHeartRate(it) }
+    }
+    
+    jump {
+        title = "心率预警"
+        summary = "心率异常时及时提醒"
+        onClick { vm.toHeartRateWarning() }
+    }
+}
+```
+
+## 常用组件速查
+
+```kotlin
+// 开关
+switchLoading {
+    setTitle(R.string.xxx)
+    checkStateBy<Data> { field }
+    onClickSuspend { vm.changeXxx(it) }
+}
+
+// 跳转（无第二行/长描述）
+jump {
+    setTitle(R.string.xxx)
+    onClick { vm.toXxx() }
+}
+
+// 数值选择（数字+空格+单位）
+valuePicker("key", picker = {
+    minValue = 1
+    maxValue = 20
+    value = data.value
+    setUnitText("步")
+}) {
+    setTitle(R.string.xxx)
+    onChange { vm.changeValue(it.toIntValue()) }
+}
+
+// 时间限制选择（时:分）
+timeLimitPicker(
+    currentTime = { 22 to 30 },
+    minuteStep = 15
+) {
+    setTitle(R.string.xxx)
+    onTimeLimitChange { h, m, _ -> vm.changeTime(h, m) }
+}
+
+// 时间选择（日时分）
+timePicker("key", picker = {
+    currentTime = { Date() }
+}) {
+    setTitle(R.string.xxx)
+    onTimeChange { vm.changeTime(it) }
+}
+
+// 日期选择（年月日）
+datePicker("key", picker = {
+    currentTime = { Date() }
+}) {
+    setTitle(R.string.xxx)
+    onDateChange { vm.changeDate(it) }
+}
+
+// 单选（单个词语）
+singleSelect {
+    setTitle(R.string.xxx)
+    setEntries(arrayOf("选项1", "选项2"))
+    setEntryValues(arrayOf("1", "2"))
+    onChange { vm.changeSelect(it) }
+}
+
+// 单选标记
+mark {
+    title = getString(R.string.xxx)
+    checkStateBy<Data> { type == TYPE_A }
+    onClickSuspend { vm.changeType(TYPE_A); true }
+}
+
+// 复选框
+checkBox {
+    setTitle(R.string.xxx)
+    onClickSuspend { vm.changeCheck(it); true }
+}
+```
+
+## 识别示例
+
+### 示例1：右侧箭头 + 数字单位
+```
+[久坐提醒设置]    >
+10000 步
+```
+❌ 不是jump  
+✅ 是valuePicker（因为第二行是"数字+空格+单位"）
+
+### 示例2：右侧箭头 + 长描述
+```
+[久坐提醒]    >
+长时间久坐时提醒您活动
+```
+✅ 是jump（因为第二行是长文字描述）
+
+### 示例3：右侧箭头 + 无描述
+```
+[心率预警]    >
+```
+✅ 是jump（因为没有第二行）
+
+### 示例4：右侧箭头 + 时间格式
+```
+[勿扰时段]    >
+22:30
+```
+❌ 不是jump  
+✅ 是timeLimitPicker（因为第二行是"时:分"格式）
+
+## 参考文档
+
+- **PreferenceDSL源码**：`lib/lib_ui/.../PreferenceDSL.kt`
+- **PreferenceDSL文档**：`.cursor/prfdsl/PreferenceDSL使用文档.md`
+- **实际示例**：`sporthealthsettings2/ui/SHSettingMainUI.kt`
