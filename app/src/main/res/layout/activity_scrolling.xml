@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ScrollingActivity">
+    <!-- 自定义高斯模糊背景控件 -->
+    <osp.sparkj.viewdsl.widget.LinearGradientView
+        android:id="@+id/blur_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:enabled="false"
+        android:scaleType="centerCrop"
+        android:src="@drawable/chutian" />
+    <!--        android:progress="80"-->
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_height="@dimen/app_bar_height"
+        android:layout_width="match_parent"
+        android:stateListAnimator="@null"
+        android:background="@android:color/transparent">
+
+        <osp.sparkj.viewdsl.widget.ScaleCollapsingToolbarLayout
+            android:id="@+id/toolbar_layout"
+            android:background="@android:color/transparent"
+            android:fitsSystemWindows="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="@android:color/transparent"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:statusBarScrim="@android:color/transparent"
+            app:toolbarId="@+id/tool_pin">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:layout_width="200dp"
+                android:src="@drawable/chutian_avatar"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:layout_height="200dp"
+                android:tag="avatar"
+                app:layout_collapseMode="parallax"
+                app:shapeAppearanceOverlay="@style/CircleImageStyle" />
+            <!--            <androidx.appcompat.widget.Toolbar-->
+            <!--                android:id="@+id/toolbar"-->
+            <!--                android:layout_height="?attr/actionBarSize"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                app:layout_collapseMode="pin"-->
+            <!--                app:popupTheme="@style/Theme.ViewDsl.PopupOverlay" />-->
+
+            <FrameLayout
+                android:id="@+id/tool_pin"
+                android:layout_height="80dp"
+                android:layout_width="match_parent"
+                app:layout_collapseMode="pin" />
+
+        </osp.sparkj.viewdsl.widget.ScaleCollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <include layout="@layout/content_scrolling" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/fab_margin"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="bottom|end"
+        app:srcCompat="@android:drawable/ic_dialog_email" />
+
+    <osp.sparkj.viewdsl.widget.LinearGradientView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:progress="80"
+        android:src="@drawable/chutian" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

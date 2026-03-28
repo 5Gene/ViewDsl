@@ -31,4 +31,18 @@
     <style name="myPreferenceStyle" parent="Preference.SwitchPreference.Material">
         <item name="android:layout">@layout/preference_material_dsl</item>
     </style>
+
+    <style name="Theme.ViewDsl.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.ViewDsl.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.ViewDsl.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- 圆形图片的 ShapeAppearanceOverlay -->
+    <style name="CircleImageStyle">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

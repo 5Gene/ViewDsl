@@ -2,10 +2,14 @@ plugins {
     id 'com.android.application'
     alias(vcl.plugins.gene.android)
     alias(vcl.plugins.gene.compose)
+    alias(vcl.plugins.kotlin.android)
 }
 
 android {
     namespace 'osp.sparkj.viewdsl'
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -16,4 +20,7 @@ dependencies {
     implementation vcl.androidx.constraintlayout
     implementation vcl.lottie
     implementation vcl.gene.adapter
+    implementation vcl.androidx.appcompat
+    implementation vcl.google.material
+    implementation vcl.androidx.constraintlayout
 }
