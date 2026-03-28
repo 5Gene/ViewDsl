@@ -1,5 +1,6 @@
 package osp.sparkj.viewdsl.widget
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -31,7 +32,7 @@ class LinearGradientView @JvmOverloads constructor(
     // gradientStart: 下方透明开始的位置 (较大 y 值)
     // gradientOffset: 渐变区域的跨度 (gradientStart - gradientEnd)
     private var gradientStart = 0f
-    private var gradientOffset = 0.2f
+    private var gradientOffset = 0.3f
 
     private val maskPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
@@ -50,7 +51,7 @@ class LinearGradientView @JvmOverloads constructor(
 //            }
 //        }
         attrs?.let {
-            // 直接从 android 命名空间读取属性，这种方式最稳妥，不需要声明 styleable
+            // 直接从 android 命名空间读取属性
             val namespace = "http://schemas.android.com/apk/res/android"
 
             // 读取 android:progress (默认 0)
@@ -64,8 +65,29 @@ class LinearGradientView @JvmOverloads constructor(
             // 可以在这里也读取一下 enabled 状态（虽然系统会自动处理 isEnabled 属性）
             isEnabled = it.getAttributeBooleanValue(namespace, "enabled", true)
         }
-        println("===== $gradientOffset $gradientStart")
         updateBlurEffect()
+
+//        setOnClickListener {
+//            // 启动测试动画
+//            startTestAnimation()
+//
+//        }
+    }
+
+    /**
+     * 测试代码：延迟 1s 后执行 gradientOffset 从 0 到 1 的动画，持续 10s
+     */
+    fun startTestAnimation() {
+        postDelayed({
+            ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 20000 // 10秒
+                addUpdateListener { animation ->
+                    gradientOffset = animation.animatedValue as Float
+                    invalidate()
+                }
+                start()
+            }
+        }, 1000) // 延迟1秒
     }
 
     /**
@@ -90,7 +112,6 @@ class LinearGradientView @JvmOverloads constructor(
 
     /**
      * 3. 提供设置开始渐变位置的方法
-     * 这里保持渐变范围跨度 (offset) 不变
      */
     fun setGradientStartPos(pos: Float) {
         this.gradientStart = pos.coerceIn(0f, 1f)
@@ -109,15 +130,14 @@ class LinearGradientView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (gradientStart <= 0f) {
-            // 禁用高斯模糊，直接绘制原始内容
+        if (gradientStart <= 0f || gradientOffset <= 0) {
             super.onDraw(canvas)
             return
         }
-        // 创建离屏缓冲层，以正确应用 PorterDuffXfermode
+        // 创建离屏缓冲层
         val count = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
 
-        // 1. 绘制原始内容 (ImageView 的图片)
+        // 1. 绘制原始内容
         super.onDraw(canvas)
 
         // 2. 绘制渐变 Mask
@@ -156,37 +176,20 @@ class LinearGradientView @JvmOverloads constructor(
         canvas.restoreToCount(count)
     }
 
-    private var lastTouchY = 0f
-
     /**
      * 4. 支持触摸事件通过上下滑动控制渐变位置
      */
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        // 如果 View 被禁用，直接返回 false，不处理任何触摸逻辑
         if (!isEnabled) return false
 
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                lastTouchY = event.y
-                return true
-            }
-
             MotionEvent.ACTION_MOVE -> {
                 val currentY = event.y
-//                val deltaPercent = (currentY - lastTouchY) / height.toFloat()
-//
-//                // 更新 gradientStart，滑动时保持 offset 不变，从而动态改变渐变位置
-//                gradientStart += deltaPercent
-//
-//                // 限制在合理范围内，避免完全滑出不可见
-//                gradientStart = gradientStart.coerceIn(-0.5f, 1.5f)
                 gradientStart = currentY / height.toFloat()
-
-//                lastTouchY = currentY
                 invalidate()
                 return true
             }
         }
-        return super.onTouchEvent(event)
+        return true
     }
 }
