@@ -100,25 +100,16 @@ class BgShadow @JvmOverloads constructor(
         val bitmap = bgBitmap ?: return
         if (width <= 0 || height <= 0) return
 
-        val isHardwareBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-
         // 核心逻辑：从 bgBitmap 中截取当前 View 所在的区域进行绘制
         val currentTop = top
-        if (isHardwareBlur) {
-            srcRect.set(0, currentTop, width, currentTop + height)
-        }
+        srcRect.set(0, currentTop, width, currentTop + height)
         dstRect.set(0, 0, width, height)
 
         // 使用离屏缓冲实现渐变透明遮罩
         val count = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
 
         // 1. 绘制背景图
-        if (isHardwareBlur) {
-            canvas.drawBitmap(bitmap, srcRect, dstRect, paint)
-        } else {
-            // 软件模糊模式下，直接全量绘制 bitmap 到 dstRect，让其自动缩放产生模糊
-            canvas.drawBitmap(bitmap, null, dstRect, paint)
-        }
+        canvas.drawBitmap(bitmap, srcRect, dstRect, paint)
 
         // 2. 绘制自然过渡的渐变遮罩
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), maskPaint)
