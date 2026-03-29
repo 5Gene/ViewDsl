@@ -15,7 +15,7 @@ class AlphaLinearGradientImageView @JvmOverloads constructor(
 
     init {
         alphaLinearGradient.initAttrs(this, attrs)
-            .setBlurRadius(20f)
+//            .setBlurRadius(20f)
     }
 
     /**
