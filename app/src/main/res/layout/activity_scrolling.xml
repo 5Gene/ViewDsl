@@ -67,13 +67,36 @@
         android:layout_marginEnd="@dimen/fab_margin"
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
+        app:behavior_autoHide="false"
+        app:layout_behavior="com.google.android.material.floatingactionbutton.FloatingActionButton$Behavior"
+        app:srcCompat="@android:drawable/ic_dialog_email" />
+    <!--    必须两个同时设置才可以设置actionButton不自动隐藏 因为如果不设置layout_behavior，那么会直接隐藏的创建个新的走默认构造函数-->
+    <!--    app:layout_behavior="com.google.android.material.floatingactionbutton.FloatingActionButton$Behavior"-->
+    <!--    app:behavior_autoHide="false"-->
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/fab_margin"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="center_vertical|end"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
-    <osp.spark.view.atelier.AlphaLinearGradientImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:enabled="true"
-        android:progress="60"
-        android:src="@drawable/chutian" />
+    <!-- 修改后的底部 FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_share"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:transitionName="shared_element_container"
+        app:srcCompat="@android:drawable/ic_menu_share" />
+
+    <!--    <osp.spark.view.atelier.AlphaLinearGradientImageView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:scaleType="centerCrop"-->
+    <!--        android:enabled="true"-->
+    <!--        android:progress="60"-->
+    <!--        android:src="@drawable/chutian" />-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
