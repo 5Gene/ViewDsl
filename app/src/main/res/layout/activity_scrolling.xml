@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ScrollingActivity">
     <!-- 自定义高斯模糊背景控件 -->
-    <osp.sparkj.viewdsl.widget.LinearGradientView
+    <osp.spark.view.atelier.AlphaLinearGradientImageView
         android:id="@+id/blur_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -74,6 +74,6 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:enabled="true"
-        android:progress="80"
+        android:progress="60"
         android:src="@drawable/chutian" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

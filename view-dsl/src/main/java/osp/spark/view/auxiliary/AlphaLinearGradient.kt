@@ -53,26 +53,16 @@ class AlphaLinearGradient {
     /**
      * 初始化属性逻辑
      */
-    fun initAttrs(view: View, attrs: AttributeSet?) {
+    fun initAttrs(view: View, attrs: AttributeSet?) = apply {
         this.view = view
         // 复用系统属性 android.R.attr.progress (0-100) 映射为 gradientStart
         // 复用系统属性 android.R.attr.secondaryProgress (0-100) 映射为 gradientOffset
-//        val systemAttrs = intArrayOf(android.R.attr.progress, android.R.attr.secondaryProgress)
-//        context.obtainStyledAttributes(attrs, systemAttrs).use {
-//            if (it.hasValue(0)) {
-//                gradientStart = it.getInt(0, 0) / 100f
-//            }
-//            if (it.hasValue(1)) {
-//                gradientOffset = it.getInt(1, 10) / 100f
-//            }
-//        }
-        attrs?.let {
-            val namespace = "http://schemas.android.com/apk/res/android"
-            val progress = it.getAttributeIntValue(namespace, "progress", 0)
-            gradientStart = progress / 100f
-            val secondary = it.getAttributeIntValue(namespace, "secondaryProgress", 12)
-            gradientOffset = secondary / 100f
-            isEnabled = it.getAttributeBooleanValue(namespace, "enabled", true)
+        AttrsReuse().fromNamespace(attrs).let {
+            gradientStart = it.progress / 100f
+            if (it.secondaryProgress > 0) {
+                gradientOffset = it.secondaryProgress / 100f
+            }
+            isEnabled = it.enabled
         }
     }
 
