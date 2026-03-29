@@ -117,10 +117,6 @@ class BgShadow @JvmOverloads constructor(
         canvas.restoreToCount(count)
     }
 
-    override fun layout(l: Int, t: Int, r: Int, b: Int) {
-        super.layout(l, t - height, r, b)
-    }
-
     override fun offsetTopAndBottom(offset: Int) {
 //        val topOffset = offset + height / 2
 //        if (topOffset != 0) {

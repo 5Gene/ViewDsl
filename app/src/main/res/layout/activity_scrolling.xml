@@ -6,13 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".ScrollingActivity">
     <!-- 自定义高斯模糊背景控件 -->
-    <osp.spark.view.atelier.AlphaLinearGradientImageView
+    <osp.spark.view.atelier.BlurFrameLayout
         android:id="@+id/blur_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <osp.spark.view.atelier.AlphaLinearGradientImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:enabled="false"
         android:scaleType="centerCrop"
         android:src="@drawable/chutian2" />
+    </osp.spark.view.atelier.BlurFrameLayout>
     <!--        android:progress="80"-->
 
     <com.google.android.material.appbar.AppBarLayout
