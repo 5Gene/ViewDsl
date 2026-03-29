@@ -24,7 +24,7 @@ class BlurFrameLayout @JvmOverloads constructor(
     private val paint = Paint(Paint.FILTER_BITMAP_FLAG)
 
     override fun dispatchDraw(canvas: Canvas) {
-        if (true || width == 0 || height == 0) {
+        if (width == 0 || height == 0) {
             super.dispatchDraw(canvas)
             return
         }
