@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -32,8 +33,24 @@ class LinearGradientView @JvmOverloads constructor(
     // gradientStart: 下方透明开始的位置 (较大 y 值)
     // gradientOffset: 渐变区域的跨度 (gradientStart - gradientEnd)
     private var gradientStart = 0f
-    private var gradientOffset = 0.3f
+    private var gradientOffset = 0.1f
 
+    // 线性渐变：从 yEnd (不透明) 到 yStart (透明)
+    // 使用多级 stops 模拟更自然的过渡（类似 Scrim 效果，增加中间节点）
+    private val colors = intArrayOf(
+        Color.BLACK,
+        Color.argb((255 * 0.92).toInt(), 0, 0, 0),
+        Color.argb((255 * 0.74).toInt(), 0, 0, 0),
+        Color.argb((255 * 0.52).toInt(), 0, 0, 0),
+        Color.argb((255 * 0.32).toInt(), 0, 0, 0),
+        Color.argb((255 * 0.15).toInt(), 0, 0, 0),
+        Color.argb((255 * 0.05).toInt(), 0, 0, 0),
+        Color.TRANSPARENT
+    )
+    private val positions = floatArrayOf(
+        0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 1.0f
+    )
+    private val gradientMatrix = Matrix()
     private val maskPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
     }
@@ -59,7 +76,7 @@ class LinearGradientView @JvmOverloads constructor(
             gradientStart = progress / 100f
 
             // 读取 android:secondaryProgress (默认 10)
-            val secondary = it.getAttributeIntValue(namespace, "secondaryProgress", 10)
+            val secondary = it.getAttributeIntValue(namespace, "secondaryProgress", 15)
             gradientOffset = secondary / 100f
 
             // 可以在这里也读取一下 enabled 状态（虽然系统会自动处理 isEnabled 属性）
@@ -67,11 +84,7 @@ class LinearGradientView @JvmOverloads constructor(
         }
         updateBlurEffect()
 
-//        setOnClickListener {
-//            // 启动测试动画
-//            startTestAnimation()
-//
-//        }
+//        startTestAnimation()
     }
 
     /**
@@ -83,6 +96,7 @@ class LinearGradientView @JvmOverloads constructor(
                 duration = 20000 // 10秒
                 addUpdateListener { animation ->
                     gradientOffset = animation.animatedValue as Float
+                    updateGradient()
                     invalidate()
                 }
                 start()
@@ -100,21 +114,20 @@ class LinearGradientView @JvmOverloads constructor(
     }
 
     /**
-     * 2. 设置渐变区域
-     * @param start 下方透明开始的相对位置 (0.0 - 1.0)
-     * @param end 上方完成不透明的相对位置 (0.0 - 1.0)
-     */
-    fun setGradientRange(start: Float, end: Float) {
-        this.gradientStart = start
-        this.gradientOffset = start - end
-        invalidate()
-    }
-
-    /**
      * 3. 提供设置开始渐变位置的方法
      */
     fun setGradientStartPos(pos: Float) {
         this.gradientStart = pos.coerceIn(0f, 1f)
+        updateGradient()
+        invalidate()
+    }
+
+    /**
+     * 4. 提供设置渐变区域跨度的方法
+     */
+    fun setGradientOffset(offset: Float) {
+        this.gradientOffset = offset.coerceIn(0f, 1f)
+        updateGradient()
         invalidate()
     }
 
@@ -129,6 +142,29 @@ class LinearGradientView @JvmOverloads constructor(
         }
     }
 
+    private fun updateGradient() {
+        if (height <= 0) {
+            return
+        }
+
+        val h = height.toFloat()
+        val translate = -h * (1 - gradientStart)
+        gradientMatrix.setTranslate(0f, translate) // 设置平移
+        val yStart = h
+        val yEnd = yStart + gradientOffset * h
+        maskPaint.shader = LinearGradient(
+            0f, yStart, 0f, yEnd,
+            colors,
+            positions,
+            Shader.TileMode.CLAMP
+        )
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        updateGradient()
+    }
+
     override fun onDraw(canvas: Canvas) {
         if (gradientStart <= 0f || gradientOffset <= 0) {
             super.onDraw(canvas)
@@ -140,38 +176,12 @@ class LinearGradientView @JvmOverloads constructor(
         // 1. 绘制原始内容
         super.onDraw(canvas)
 
+        val translate = -height * (1 - gradientStart)
+        gradientMatrix.setTranslate(0f, translate) // 设置平移
         // 2. 绘制渐变 Mask
-        val h = height.toFloat()
-        val yStart = gradientStart * h
-        // 动态计算 gradientEnd 的 Y 坐标
-        val yEnd = (gradientStart + gradientOffset) * h
-
-        // 线性渐变：从 yEnd (不透明) 到 yStart (透明)
-        // 使用多级 stops 模拟更自然的过渡（类似 Scrim 效果，增加中间节点）
-        val colors = intArrayOf(
-            Color.BLACK,
-            Color.argb((255 * 0.92).toInt(), 0, 0, 0),
-            Color.argb((255 * 0.74).toInt(), 0, 0, 0),
-            Color.argb((255 * 0.52).toInt(), 0, 0, 0),
-            Color.argb((255 * 0.32).toInt(), 0, 0, 0),
-            Color.argb((255 * 0.15).toInt(), 0, 0, 0),
-            Color.argb((255 * 0.05).toInt(), 0, 0, 0),
-            Color.TRANSPARENT
-        )
-        val positions = floatArrayOf(
-            0.0f, 0.125f, 0.25f, 0.375f, 0.5f, 0.625f, 0.75f, 1.0f
-        )
-
-        val gradient = LinearGradient(
-            0f, yStart, 0f, yEnd,
-            colors,
-            positions,
-            Shader.TileMode.CLAMP
-        )
-
-        maskPaint.shader = gradient
+        maskPaint.shader.setLocalMatrix(gradientMatrix)
         // 在整个 View 范围内绘制，shader 会根据坐标应用渐变
-        canvas.drawRect(0f, 0f, width.toFloat(), h, maskPaint)
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), maskPaint)
 
         canvas.restoreToCount(count)
     }
@@ -181,6 +191,7 @@ class LinearGradientView @JvmOverloads constructor(
      */
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isEnabled) return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && hasOnLongClickListeners()) return super.onTouchEvent(event)
 
         when (event.action) {
             MotionEvent.ACTION_MOVE -> {
