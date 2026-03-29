@@ -1,4 +1,4 @@
-package osp.spark.view.ui.custom
+package osp.spark.view.atelier.behaviors
 
 class Behavior {
 
