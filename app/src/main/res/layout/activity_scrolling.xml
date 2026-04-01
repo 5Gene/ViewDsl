@@ -46,6 +46,14 @@
                 android:layout_width="match_parent"
                 app:layout_collapseMode="pin" />
 
+            <osp.sparkj.viewdsl.widget.ReflectionLayout
+                android:layout_width="200dp"
+                android:src="@drawable/chutian_avatar"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:layout_height="200dp"
+                android:tag="avatar"
+                app:layout_collapseMode="parallax">
             <com.google.android.material.imageview.ShapeableImageView
                 android:layout_width="200dp"
                 android:src="@drawable/chutian_avatar"
@@ -55,6 +63,7 @@
                 android:tag="avatar"
                 app:layout_collapseMode="parallax"
                 app:shapeAppearanceOverlay="@style/CircleImageStyle" />
+            </osp.sparkj.viewdsl.widget.ReflectionLayout>
             <!--            <androidx.appcompat.widget.Toolbar-->
             <!--                android:id="@+id/toolbar"-->
             <!--                android:layout_height="?attr/actionBarSize"-->
@@ -113,4 +122,24 @@
     <!--        android:enabled="true"-->
     <!--        android:progress="60"-->
     <!--        android:src="@drawable/chutian" />-->
+
+    <osp.sparkj.viewdsl.widget.ReflectionLayout
+        android:layout_width="200dp"
+        android:src="@drawable/chutian_avatar"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:layout_height="200dp"
+        android:tag="avatar"
+        app:layout_collapseMode="parallax">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="200dp"
+            android:src="@drawable/chutian_avatar"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:layout_height="200dp"
+            android:tag="avatar"
+            app:layout_collapseMode="parallax"
+            app:shapeAppearanceOverlay="@style/CircleImageStyle" />
+    </osp.sparkj.viewdsl.widget.ReflectionLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
