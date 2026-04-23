@@ -13,6 +13,15 @@
         android:theme="@style/Theme.ViewDsl"
         tools:targetApi="34">
         <activity
+            android:name=".MaskActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ScrollingActivity"
             android:exported="true"
             android:label="@string/title_activity_scrolling"
@@ -22,15 +31,13 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".PreferenceActivity"
             android:exported="true" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"></activity>
         <activity
             android:name=".FlipActivity"
             android:exported="true" />

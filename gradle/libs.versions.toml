@@ -2,8 +2,20 @@
 
 [versions]
 gene-view-dsl = "1.1"
+appcompat = "1.7.1"
+material = "1.13.0"
+activity-ktx = "1.13.0"
+constraintlayout = "2.2.1"
+segmentation-selfie = "16.0.0-beta6"
+tasks-vision = "0.20230731"
 
 [libraries]
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity-ktx" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+tasks-vision = { module = "com.google.mediapipe:tasks-vision", version.ref = "tasks-vision" }
+segmentation-selfie = { module = "com.google.mlkit:segmentation-selfie", version.ref = "segmentation-selfie" }
 
 [bundles]
 

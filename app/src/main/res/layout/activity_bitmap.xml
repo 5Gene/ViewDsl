@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scaleType="fitCenter"
+    android:fitsSystemWindows="true"
+    android:src="@drawable/chutian2"
+    tools:context=".MaskActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="450dp">
+
+
+        <osp.sparkj.viewdsl.bitmap.ZoomImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/chutian2"
+            app:layout_anchor="@+id/outer"
+            tools:context=".MaskActivity" />
+
+        <osp.sparkj.viewdsl.bitmap.MaskedFrameLayout
+            android:foreground="@drawable/bg_mask"
+            android:background="#80F15353"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+        <osp.sparkj.viewdsl.bitmap.MaskedFrameLayout
+            android:foreground="@drawable/out_mask"
+            android:background="#80F15353"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <osp.sparkj.viewdsl.bitmap.ZoomImageView
+                android:id="@+id/outer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/chutian2" />
+        </osp.sparkj.viewdsl.bitmap.MaskedFrameLayout>
+
+    </FrameLayout>
+
+    <!--    <osp.sparkj.viewdsl.bitmap.ZoomImageView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:scaleType="fitCenter"-->
+    <!--        android:src="@drawable/chutian2"-->
+    <!--        tools:context=".BitmapActivity">-->
+
+    <!--    </osp.sparkj.viewdsl.bitmap.ZoomImageView>-->
+</FrameLayout>
