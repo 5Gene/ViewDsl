@@ -10,7 +10,6 @@ import android.graphics.PorterDuffXfermode
  * 裁切算法（策略）。无状态，单例复用。
  *
  * 同一个 [CropStrategy] 会同时作用在 "原图 × bgMask" 与 "人物 × personMask" 两路上，
- * 调用方通过构造 `StickerPipeline` 时注入的 strategy 选择。
  */
 interface CropStrategy {
     fun apply(src: Bitmap, mask: Bitmap): Bitmap

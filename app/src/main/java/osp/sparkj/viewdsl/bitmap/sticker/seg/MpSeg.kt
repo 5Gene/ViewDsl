@@ -14,6 +14,7 @@ import java.nio.ByteOrder
 
 /**
  * 基于 MediaPipe Image Segmenter 的人物抠图。
+ * 官方文档：https://developers.google.com/mediapipe/solutions/vision/image_segmenter
  *
  * 使用 selfie_segmenter.tflite 模型，用户需要在
  * `app/src/main/assets/<modelAssetPath>` 放置该模型文件
