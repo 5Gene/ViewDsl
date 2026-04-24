@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.RectF
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.GestureDetector
@@ -12,6 +13,11 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.graphics.drawable.toBitmap
+import osp.sparkj.viewdsl.bitmap.sticker.StickerPipeline
+import osp.sparkj.viewdsl.bitmap.sticker.seg.MlKitSeg
+import osp.sparkj.viewdsl.bitmap.sticker.stroke.AlphaStroke
+import kotlin.concurrent.thread
 
 /**
  * 支持双击 / 双指缩放 + 拖动的图片控件。
@@ -312,32 +318,36 @@ class ZoomImageView @JvmOverloads constructor(
      * }
      * ```
      */
-    protected open fun transformIncomingDrawable(drawable: Drawable?): Drawable {
-//        thread {
-//            val input = drawable!!.toBitmap()
+    protected open fun transformIncomingDrawable(drawable: Drawable?) {
+        thread {
+            val input = drawable!!.toBitmap()
 //            val ctx = RunCtx(input)
-//
-////            val bitmapDrawable = BitmapDrawable(MlKitSeg(.6f).process(ctx, input))
-//            val bitmapDrawable = StickerPipeline()
-//                .addStep(MlKitSeg(.6f))
-//                .addStep(AlphaStroke())
-////                .addStep(BlurStroke())
-////                .addStep(ShaderStroke(width = 15, color = Color.WHITE))
-////                .addStep(CropStep(KeepInside, personMask))
-////                .addBgStep(CropStep(KeepInside, bgMask))
-//                .execute(input)
-//            post {
-//                super.setImageDrawable(BitmapDrawable(bitmapDrawable))
-//            }
-////            setImageBitmap(MlKitSeg().process(ctx, input))
-//        }
-        return drawable!!
+
+//            val bitmapDrawable = BitmapDrawable(MlKitSeg(.6f).process(ctx, input))
+            val bitmapDrawable = StickerPipeline()
+                .addStep(MlKitSeg(.6f))
+                .addStep(AlphaStroke())
+//                .addStep(BlurStroke())
+//                .addStep(ShaderStroke(width = 15, color = Color.WHITE))
+//                .addStep(CropStep(KeepInside, personMask))
+//                .addBgStep(CropStep(KeepInside, bgMask))
+                .execute(input)
+            post {
+                setImageDrawable(BitmapDrawable(bitmapDrawable))
+            }
+//            setImageBitmap(MlKitSeg().process(ctx, input))
+        }
     }
 
     override fun setImageDrawable(drawable: Drawable?) {
-        val processed = transformIncomingDrawable(drawable)
-        super.setImageDrawable(processed)
-        rebuildBase()
+        if (tag == "transform") {
+            tag = null
+            transformIncomingDrawable(drawable)
+        } else {
+            super.setImageDrawable(drawable)
+            rebuildBase()
+        }
+
     }
 
     // ---------- 内部：矩阵装配 ----------

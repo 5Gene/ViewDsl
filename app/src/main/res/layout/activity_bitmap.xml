@@ -25,14 +25,13 @@
 
         <osp.sparkj.viewdsl.bitmap.MaskedFrameLayout
             android:foreground="@drawable/bg_mask"
-            android:background="#80F15353"
+            android:background="#80FFFFFF"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
 
         <osp.sparkj.viewdsl.bitmap.MaskedFrameLayout
             android:foreground="@drawable/out_mask"
-            android:background="#80F15353"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -40,6 +39,7 @@
                 android:id="@+id/outer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:tag="transform"
                 android:scaleType="centerCrop"
                 android:src="@drawable/chutian2" />
         </osp.sparkj.viewdsl.bitmap.MaskedFrameLayout>
