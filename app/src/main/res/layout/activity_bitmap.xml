@@ -24,14 +24,14 @@
             tools:context=".MaskActivity" />
 
         <osp.sparkj.viewdsl.bitmap.MaskedFrameLayout
-            android:foreground="@drawable/bg_mask"
+            android:src="@drawable/bg_mask"
             android:background="#80FFFFFF"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
 
         <osp.sparkj.viewdsl.bitmap.MaskedFrameLayout
-            android:foreground="@drawable/out_mask"
+            android:src="@drawable/out_mask"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

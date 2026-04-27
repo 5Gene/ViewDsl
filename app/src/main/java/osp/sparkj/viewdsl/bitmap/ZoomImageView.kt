@@ -257,9 +257,17 @@ class ZoomImageView @JvmOverloads constructor(
         }
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (!isEnabled) {
+            return false // 不消费，向上传递
+        }
+        return super.dispatchTouchEvent(event)
+    }
+
     // ---------- 触摸 ----------
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!isEnabled) return false
         if (drawable == null) return super.onTouchEvent(event)
         parent?.requestDisallowInterceptTouchEvent(true)
         scaleDetector.onTouchEvent(event)

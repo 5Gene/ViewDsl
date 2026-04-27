@@ -11,6 +11,7 @@ import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.drawable.toBitmap
 
 /**
@@ -76,6 +77,20 @@ class MaskedFrameLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    object DrawStage {
+        const val NONE = 0
+        const val DISPATCH = 1 shl 0
+        const val BACKGROUND = 1 shl 1
+        const val FOREGROUND = 1 shl 2
+
+        // DRAW 表示完整绘制 = 前面所有阶段的合集
+        const val DRAW = DISPATCH or BACKGROUND or FOREGROUND
+
+        const val ALL = DRAW
+    }
+
+    var drawStageMask: Int = DrawStage.DRAW
+
     enum class MaskMode {
         /** 保留蒙版不透明区域的子 View（DST_IN）；蒙版透明处镂空透出 background。 */
         KEEP_OPAQUE,
@@ -109,14 +124,14 @@ class MaskedFrameLayout @JvmOverloads constructor(
         setWillNotDraw(false)
         // saveLayer + Xfermode 在软件画布上结果不可靠，显式开启硬件层兜底
         setLayerType(LAYER_TYPE_HARDWARE, null)
-    }
 
-    /**
-     * 拦截 `android:foreground` 与代码 `setForeground(...)`：用作蒙版，不调用 super，
-     * 避免被 FrameLayout 作为普通前景再绘制一遍覆盖在最上层。
-     */
-    override fun setForeground(foreground: Drawable?) {
-        setMaskDrawable(foreground)
+        // 读取 android:src 作为 mask
+        context.withStyledAttributes(attrs, intArrayOf(android.R.attr.src)) {
+            val drawable = getDrawable(0)
+            if (drawable != null) {
+                setMaskDrawable(drawable)
+            }
+        }
     }
 
     /** 从 Drawable 提取蒙版 Bitmap（传 null 清除）。 */
@@ -154,6 +169,7 @@ class MaskedFrameLayout @JvmOverloads constructor(
         maskMatrix.setRectToRect(srcRect, dstRect, Matrix.ScaleToFit.FILL)
     }
 
+
     /**
      * 绘制流程（作用域包住**整张 View**）：
      * 1. `saveLayer` 开一张离屏图层，覆盖整张 View；
@@ -168,19 +184,59 @@ class MaskedFrameLayout @JvmOverloads constructor(
      * ⚠ 关键点：拦截在 `draw`（而不是 `dispatchDraw`），是因为 background 是在
      * `View.draw()` 内部最先画出来的，只有在这里 saveLayer 才能把它也一并纳入裁切。
      */
-    override fun draw(canvas: Canvas) {
+    private inline fun withMask(canvas: Canvas, block: () -> Unit) {
         val mask = maskBitmap
         if (mask == null || mask.isRecycled) {
-            super.draw(canvas)
+            block()
             return
         }
 
         val saveCount = canvas.saveLayer(
             0f, 0f, width.toFloat(), height.toFloat(), null
         )
-        super.draw(canvas)
+        block()
         val paint = if (maskMode == MaskMode.KEEP_OPAQUE) dstInPaint else dstOutPaint
         canvas.drawBitmap(mask, maskMatrix, paint)
         canvas.restoreToCount(saveCount)
+    }
+
+    override fun draw(canvas: Canvas) {
+        if ((drawStageMask and DrawStage.DRAW) != 0) {
+            withMask(canvas) {
+                super.draw(canvas)
+            }
+        } else {
+            super.draw(canvas)
+        }
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        if ((drawStageMask and DrawStage.DISPATCH) != 0) {
+            withMask(canvas) {
+                super.dispatchDraw(canvas)
+            }
+        } else {
+            super.dispatchDraw(canvas)
+        }
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        if ((drawStageMask and DrawStage.BACKGROUND) != 0) {
+            withMask(canvas) {
+                super.onDraw(canvas)
+            }
+        } else {
+            super.onDraw(canvas)
+        }
+    }
+
+    override fun onDrawForeground(canvas: Canvas) {
+        if ((drawStageMask and DrawStage.FOREGROUND) != 0) {
+            withMask(canvas) {
+                super.onDrawForeground(canvas)
+            }
+        } else {
+            super.onDrawForeground(canvas)
+        }
     }
 }
