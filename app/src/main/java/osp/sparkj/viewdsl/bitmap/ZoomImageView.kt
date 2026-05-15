@@ -6,6 +6,7 @@ import android.graphics.Matrix
 import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -345,6 +346,31 @@ class ZoomImageView @JvmOverloads constructor(
             }
 //            setImageBitmap(MlKitSeg().process(ctx, input))
         }
+    }
+
+
+    /**
+     * `ImageView.setImageURI()` 内部直接调用 `resolveUri()` → `updateDrawable()`，
+     * **完全绕过 `setImageDrawable()` 的 override**，导致 `rebuildBase()` 和
+     * `transformIncomingDrawable` 都不会执行，矩阵无法重建，图片显示异常。
+     *
+     * 修复：自己把 URI 解析成 Drawable，再走 `setImageDrawable()`，
+     * 确保完整的处理链路（transformIncomingDrawable → super.setImageDrawable → rebuildBase）。
+     *
+     * 支持 `content://`（相册）、`android.resource://`、`file://` 等常见 scheme。
+     */
+    override fun setImageURI(uri: Uri?) {
+        if (uri == null) {
+            setImageDrawable(null)
+            return
+        }
+        val drawable = try {
+            val stream = context.contentResolver.openInputStream(uri)
+            Drawable.createFromStream(stream, uri.toString())
+        } catch (e: Exception) {
+            null
+        }
+        setImageDrawable(drawable)
     }
 
     override fun setImageDrawable(drawable: Drawable?) {

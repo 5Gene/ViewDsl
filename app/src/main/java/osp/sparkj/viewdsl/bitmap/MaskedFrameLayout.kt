@@ -1,5 +1,6 @@
 package osp.sparkj.viewdsl.bitmap
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -13,6 +14,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.isVisible
 
 /**
  * 把整个 View（background + 子 View）用蒙版裁成指定形状的 FrameLayout。
@@ -42,7 +44,7 @@ import androidx.core.graphics.drawable.toBitmap
  *     android:layout_height="200dp"
  *     android:background="@drawable/pattern_bg"     ← 镂空外显示
  *     android:foreground="@drawable/mask_shape"     ← 拦截用作蒙版
- *     app:maskMode="keepOpaque">                    ← 默认：标准 alpha 蒙版
+ *     app:supplementalDescription="keepOpaque">                    ← 默认：标准 alpha 蒙版
  *
  *     <!-- 子 View 可选，也会被一起裁 -->
  * </osp.sparkj.viewdsl.bitmap.MaskFrameLayout>
@@ -71,6 +73,7 @@ import androidx.core.graphics.drawable.toBitmap
  * - `saveLayer + Xfermode` 依赖硬件加速，init 时主动开启硬件层兜底；
  * - 代码切换蒙版：[setMaskDrawable] / [setMaskBitmap]；切换模式：[maskMode]。
  */
+@SuppressLint("ResourceType")
 class MaskedFrameLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -83,13 +86,12 @@ class MaskedFrameLayout @JvmOverloads constructor(
         const val BACKGROUND = 1 shl 1
         const val FOREGROUND = 1 shl 2
 
-        // DRAW 表示完整绘制 = 前面所有阶段的合集
-        const val DRAW = DISPATCH or BACKGROUND or FOREGROUND
+        // DRAW 表示完整绘制
+        const val DRAW = 1 shl 3
 
-        const val ALL = DRAW
     }
 
-    var drawStageMask: Int = DrawStage.DRAW
+    var drawStageMask: Int = DrawStage.DISPATCH
 
     enum class MaskMode {
         /** 保留蒙版不透明区域的子 View（DST_IN）；蒙版透明处镂空透出 background。 */
@@ -125,12 +127,35 @@ class MaskedFrameLayout @JvmOverloads constructor(
         // saveLayer + Xfermode 在软件画布上结果不可靠，显式开启硬件层兜底
         setLayerType(LAYER_TYPE_HARDWARE, null)
 
-        // 读取 android:src 作为 mask
-        context.withStyledAttributes(attrs, intArrayOf(android.R.attr.src)) {
+        // 读取 android:src 作为 mask；读取 android:supplementalDescription 作为 maskMode 配置
+        // 例子：
+        // - android:supplementalDescription="keepOpaque"      -> KEEP_OPAQUE
+        // - android:supplementalDescription="keepTransparent" -> KEEP_TRANSPARENT
+        // - android:supplementalDescription="0/1"             -> KEEP_OPAQUE / KEEP_TRANSPARENT
+        context.withStyledAttributes(
+            attrs,
+            intArrayOf(android.R.attr.src, android.R.attr.supplementalDescription)
+        ) {
             val drawable = getDrawable(0)
             if (drawable != null) {
                 setMaskDrawable(drawable)
             }
+            parseMaskMode(getString(1))?.let {
+                maskMode = it
+            }
+        }
+    }
+
+    private fun parseMaskMode(value: String?): MaskMode? {
+        val key = value?.trim()?.lowercase() ?: return null
+        return when (key) {
+            "keepopaque", "opaque", "in", "dst_in", "dstin", "0", "保留不透明", "不透明" ->
+                MaskMode.KEEP_OPAQUE
+
+            "keeptransparent", "transparent", "out", "dst_out", "dstout", "1", "保留透明", "透明", "镂空" ->
+                MaskMode.KEEP_TRANSPARENT
+
+            else -> null
         }
     }
 
@@ -238,5 +263,28 @@ class MaskedFrameLayout @JvmOverloads constructor(
         } else {
             super.onDrawForeground(canvas)
         }
+    }
+
+    @SuppressLint("WrongCall")
+    fun capture(): Bitmap? {
+        if (!isVisible) {
+            return null
+        }
+        val w = width
+        val h = height
+        if (w <= 0 || h <= 0) return null
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        // 只捕获子 View 的绘制内容（dispatchDraw），不包含 mask/foreground 等额外效果
+        if ((drawStageMask and DrawStage.DRAW) != 0) {
+            draw(canvas)
+        } else if ((drawStageMask and DrawStage.DISPATCH) != 0) {
+            dispatchDraw(canvas)
+        } else if ((drawStageMask and DrawStage.BACKGROUND) != 0) {
+            onDraw(canvas)
+        } else if ((drawStageMask and DrawStage.FOREGROUND) != 0) {
+            onDrawForeground(canvas)
+        }
+        return bitmap
     }
 }
