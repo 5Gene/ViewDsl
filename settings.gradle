@@ -12,15 +12,20 @@ pluginManagement {
     }
 }
 
+//plugins {
+//    id("io.github.5hmlA.vcl") version "2026.05.24"
+//}
+//
+//vcl {
+//    doOverride {
+//        version("gene-conventions","2026.05.24-2")
+//    }
+//}
+
 plugins {
-    id("io.github.5hmlA.vcl") version "2026.05.24"
+    id("io.github.5hmlA.vcl") version "2026.05.25"
 }
 
-vcl {
-    doOverride {
-
-    }
-}
 dependencyResolutionManagement {
     repositories {
         google()
