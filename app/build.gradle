@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
     alias(vcl.plugins.gene.android)
     alias(vcl.plugins.gene.compose)
-    alias(vcl.plugins.kotlin.android)
 }
 
 android {

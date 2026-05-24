@@ -282,5 +282,5 @@ fun main() {
             append("bold str")
         }
     }
-    "".spanByKeys(mapOf("" to arrayOf(ForegroundColorSpan(Color.RED), BackgroundColorSpan(Color.GRAY))))
+    "".spanByKeys(mapOf("" to arrayOf<CharacterStyle>(ForegroundColorSpan(Color.RED), BackgroundColorSpan(Color.GRAY))))
 }
