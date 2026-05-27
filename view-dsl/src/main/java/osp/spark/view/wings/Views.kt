@@ -172,7 +172,16 @@ fun View.padding(
     right: Number? = null,
     bottom: Number? = null
 ) {
-    throw IllegalStateException("请使用 -> View.updatePadding()")
+    if (left != null || top != null || right != null || bottom != null) {
+        updatePadding(
+            left?.toInt() ?: paddingStart,
+            top?.toInt() ?: paddingTop,
+            right?.toInt() ?: paddingEnd,
+            bottom?.toInt() ?: paddingBottom
+        )
+        return
+    }
+    println("请使用 -> View.updatePadding()")
 }
 
 fun View.padding(padding: Int) {
