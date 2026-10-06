@@ -1,4 +1,5 @@
 import june.wing.GroupIdMavenCentral
+import june.wing.beijingTimeVersion
 import june.wing.publishMavenCentral
 
 plugins {
@@ -9,7 +10,7 @@ plugins {
 
 
 group = GroupIdMavenCentral
-version = libs.versions.gene.view.dsl.get()
+version = beijingTimeVersion
 
 publishMavenCentral("android view dsl")
 //publish5hmlA("android view dsl")
